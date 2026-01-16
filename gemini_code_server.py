@@ -73,7 +73,7 @@ def Grep(pattern: str, path: str):
 print("🤖 INITIALIZING GEMINI CODE SERVER (Single Page Mode)...")
 
 if not os.path.exists(PERSONA_FILE):
-    # Fallback if specific persona missing, or creating a dummy for the test
+    # Fallback if specific persona missing
     print(f"⚠️  Warning: {PERSONA_FILE} not found. Using default engineer prompt.")
     SYSTEM_INSTRUCTION = "You are an expert Software Engineer agent. You can execute bash commands, edit files, and view files."
 else:
@@ -88,7 +88,6 @@ if not api_key:
 
 client = genai.Client(api_key=api_key)
 
-# Maintain chat history in the session
 chat_session = client.chats.create(
     model=MODEL_ID,
     config=types.GenerateContentConfig(
@@ -126,17 +125,16 @@ HTML_TEMPLATE = """
 <body>
     <h1>🤖 Gemini Code Console (Port 8888)</h1>
     <div id="chat-history">
-        </div>
+        {{CHAT_HISTORY}}
+    </div>
     <form method="POST" action="/">
         <textarea name="prompt" placeholder="Command (e.g. 'ls -la', 'create test.py')..." autofocus></textarea>
         <button type="submit">Run</button>
     </form>
     <script>
-        // Auto-scroll to bottom
         const history = document.getElementById('chat-history');
         history.scrollTop = history.scrollHeight;
         
-        // Submit on Enter (without Shift)
         document.querySelector('textarea').addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -148,7 +146,6 @@ HTML_TEMPLATE = """
 </html>
 """
 
-# Simple in-memory history list
 history_log = []
 
 class GeminiHandler(http.server.SimpleHTTPRequestHandler):
@@ -158,21 +155,19 @@ class GeminiHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Content-type", "text/html")
             self.end_headers()
             
-            # Render history
             history_html = ""
             for role, text in history_log:
                 css_class = "user-msg" if role == "USER" else "agent-msg"
-                # Basic escaping
                 safe_text = text.replace("<", "&lt;").replace(">", "&gt;")
                 history_html += f'<div class="msg {css_class}"><strong>{role}:</strong>\n{safe_text}</div>'
             
             if not history_log:
                 history_html = '<div class="msg agent-msg">System ready. Waiting for instructions...</div>'
 
-            response_html = HTML_TEMPLATE.replace("", history_html)
+            # FIX: Replace the placeholder explicitly, not the empty string
+            response_html = HTML_TEMPLATE.replace("{{CHAT_HISTORY}}", history_html)
             self.wfile.write(response_html.encode())
         else:
-            # Handle favicon or other requests
             super().do_GET()
 
     def do_POST(self):
@@ -186,7 +181,6 @@ class GeminiHandler(http.server.SimpleHTTPRequestHandler):
                 print(f"\n📩 PROMPT: {user_prompt}")
                 history_log.append(("USER", user_prompt))
                 try:
-                    # Send message to Gemini with tools enabled
                     response = chat_session.send_message(user_prompt)
                     output_text = response.text
                 except Exception as e:
@@ -194,7 +188,6 @@ class GeminiHandler(http.server.SimpleHTTPRequestHandler):
                 
                 history_log.append(("GEMINI", output_text))
             
-            # Redirect back to GET to prevent form resubmission on refresh
             self.send_response(303)
             self.send_header("Location", "/")
             self.end_headers()

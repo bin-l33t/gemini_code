@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import argparse
 from google import genai
 from google.genai import types
 
@@ -8,19 +9,15 @@ from google.genai import types
 PERSONA_FILE = "hydrated_personas/agent_engineer.md"
 MODEL_ID = "gemini-2.0-flash"
 
-# --- Tool Implementations (The "Runtime") ---
-# These function names match the 'master_tool_definitions.json' extract
-
+# --- Tool Implementations ---
 def Bash(command: str):
     """Executes a command in the bash shell. Use this to run python scripts."""
     print(f"\n[S] ⚡ Executing: {command}")
     try:
-        # Safety: Timeout to prevent hangs
         result = subprocess.run(
             command, shell=True, capture_output=True, text=True, timeout=30
         )
         output = result.stdout + result.stderr
-        # Truncate output if massive
         display_out = output[:200] + "..." if len(output) > 200 else output
         print(f"[S] 📤 Output: {display_out.strip()}")
         return output
@@ -51,7 +48,7 @@ def View(path: str):
 
 # --- The Agent ---
 
-def run_mission():
+def run_mission(prompt_file=None):
     print("🤖 INITIALIZING GEMINI CODE AUTO-TEST SYSTEM...")
     
     # 1. Load Persona
@@ -72,28 +69,36 @@ def run_mission():
     client = genai.Client(api_key=api_key)
 
     # 3. Define the Mission
-    user_prompt = (
-        "MISSION: \n"
-        "1. Create a python script named 'hello_math.py'.\n"
-        "2. Inside, print 'Hello Gemini Code'.\n"
-        "3. Also calculate the sum of 123456789 and 987654321 and print it.\n"
-        "4. Execute the script using python3 and show me the output.\n"
-        "IT NEEDS TO RUN AUTOMATICALLY."
-    )
+    if prompt_file:
+        if not os.path.exists(prompt_file):
+            print(f"❌ Error: Prompt file '{prompt_file}' not found.")
+            sys.exit(1)
+        with open(prompt_file, 'r') as f:
+            user_prompt = f.read()
+        print(f"📂 Read mission from: {prompt_file}")
+    else:
+        # Default Hardcoded Mission
+        user_prompt = (
+            "MISSION: \n"
+            "1. Create a python script named 'hello_math.py'.\n"
+            "2. Inside, print 'Hello Gemini Code'.\n"
+            "3. Also calculate the sum of 123456789 and 987654321 and print it.\n"
+            "4. Execute the script using python3 and show me the output.\n"
+            "IT NEEDS TO RUN AUTOMATICALLY."
+        )
 
-    print(f"\n🎯 MISSION: {user_prompt}\n" + "="*60)
+    print(f"\n🎯 MISSION:\n{user_prompt}\n" + "="*60)
 
     # 4. Start Chat with Automatic Tool Execution
-    # We pass the python functions directly; the SDK handles serialization/execution
     chat = client.chats.create(
         model=MODEL_ID,
         config=types.GenerateContentConfig(
             system_instruction=system_instruction,
-            tools=[Bash, Edit, View], # Register our runtime tools
-            temperature=0.1, # Low temp for precise coding
+            tools=[Bash, Edit, View],
+            temperature=0.1,
             automatic_function_calling=types.AutomaticFunctionCallingConfig(
                 disable=False,
-                maximum_remote_calls=10 # Prevent infinite loops
+                maximum_remote_calls=15
             )
         )
     )
@@ -105,18 +110,9 @@ def run_mission():
     print(f"🤖 [AGENT REPORT]:\n{response.text}")
     print("="*60)
 
-    # 6. Verification
-    print("\n🔎 VERIFYING OUTPUT...")
-    if os.path.exists("hello_math.py"):
-        print("✅ 'hello_math.py' exists.")
-        output = subprocess.getoutput("python3 hello_math.py")
-        if "1111111110" in output:
-             print("✅ Math verified (1111111110 found).")
-             print("✨ TEST PASSED: Gemini Code is Operational.")
-        else:
-             print(f"⚠️ Math verification failed. Output:\n{output}")
-    else:
-        print("❌ 'hello_math.py' was NOT created.")
-
 if __name__ == "__main__":
-    run_mission()
+    parser = argparse.ArgumentParser(description="Run Gemini Auto-Test Agent")
+    parser.add_argument("prompt_file", nargs="?", help="Path to a text file containing the prompt/mission")
+    args = parser.parse_args()
+    
+    run_mission(args.prompt_file)
