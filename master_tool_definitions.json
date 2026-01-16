@@ -105,6 +105,29 @@
     }
   },
   {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "description": "Must be set to 'javascript_exec'"
+      },
+      "text": {
+        "type": "string",
+        "description": "The JavaScript code to execute. The code will be evaluated in the page context. The result of the last expression will be returned automatically. Do NOT use 'return' statements - just write the expression you want to evaluate (e.g., 'window.myData.value' not 'return window.myData.value'). You can access and modify the DOM, call page functions, and interact with page variables."
+      },
+      "tabId": {
+        "type": "number",
+        "description": "Tab ID to execute the code in. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+      }
+    },
+    "required": [
+      "action",
+      "text",
+      "tabId"
+    ],
+    "name": "browser_evaluate"
+  },
+  {
     "name": "read_page",
     "description": "Get an accessibility tree representation of elements on the page. By default returns all elements including non-visible ones. Output is limited to 50000 characters. If the output exceeds this limit, you will receive an error asking you to specify a smaller depth or focus on a specific element using ref_id. Optionally filter for only interactive elements. If you don't have a valid tab ID, use tabs_context_mcp first to get available tabs.",
     "inputSchema": {
@@ -152,6 +175,37 @@
     }
   },
   {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": [
+          "left_click",
+          "right_click",
+          "type",
+          "screenshot",
+          "wait",
+          "scroll",
+          "key",
+          "left_click_drag",
+          "double_click",
+          "triple_click",
+          "zoom",
+          "scroll_to",
+          "hover"
+        ],
+        "description": "The action to perform:\n* `left_click`: Click the left mouse button at the specified coordinates.\n* `right_click`: Click the right mouse button at the specified coordinates to open context menus.\n* `double_click`: Double-click the left mouse button at the specified coordinates.\n* `triple_click`: Triple-click the left mouse button at the specified coordinates.\n* `type`: Type a string of text.\n* `screenshot`: Take a screenshot of the screen.\n* `wait`: Wait for a specified number of seconds.\n* `scroll`: Scroll up, down, left, or right at the specified coordinates.\n* `key`: Press a specific keyboard key.\n* `left_click_drag`: Drag from start_coordinate to coordinate.\n* `zoom`: Take a screenshot of a specific region for closer inspection.\n* `scroll_to`: Scroll an element into view using its element reference ID from read_page or find tools.\n* `hover`: Move the mouse cursor to the specified coordinates or element without clicking. Useful for revealing tooltips, dropdown menus, or triggering hover states."
+      },
+      "coordinate": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        }
+      }
+    },
+    "name": "computer"
+  },
+  {
     "name": "resize_window",
     "description": "Resize the current browser window to specified dimensions. Useful for testing responsive designs or setting up specific screen sizes. If you don't have a valid tab ID, use tabs_context_mcp first to get available tabs.",
     "inputSchema": {
@@ -178,6 +232,60 @@
     }
   },
   {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": [
+          "start_recording",
+          "stop_recording",
+          "export",
+          "clear"
+        ],
+        "description": "Action to perform: 'start_recording' (begin capturing), 'stop_recording' (stop capturing but keep frames), 'export' (generate and export GIF), 'clear' (discard frames)"
+      },
+      "tabId": {
+        "type": "number",
+        "description": "Tab ID to identify which tab group this operation applies to"
+      },
+      "download": {
+        "type": "boolean",
+        "description": "Always set this to true for the 'export' action only. This causes the gif to be downloaded in the browser."
+      },
+      "filename": {
+        "type": "string",
+        "description": "Optional filename for exported GIF (default: 'recording-[timestamp].gif'). For 'export' action only."
+      },
+      "options": {
+        "type": "object",
+        "description": "Optional GIF enhancement options for 'export' action. Properties: showClickIndicators (bool), showDragPaths (bool), showActionLabels (bool), showProgressBar (bool), showWatermark (bool), quality (number 1-30). All default to true except quality (default: 10).",
+        "properties": {
+          "showClickIndicators": {
+            "type": "boolean",
+            "description": "Show orange circles at click locations (default: true)"
+          },
+          "showDragPaths": {
+            "type": "boolean",
+            "description": "Show red arrows for drag actions (default: true)"
+          },
+          "showActionLabels": {
+            "type": "boolean",
+            "description": "Show black labels describing actions (default: true)"
+          },
+          "showProgressBar": {
+            "type": "boolean",
+            "description": "Show orange progress bar at bottom (default: true)"
+          },
+          "showWatermark": {
+            "type": "boolean",
+            "description": "Show Claude logo watermark (default: true)"
+          }
+        }
+      }
+    },
+    "name": "record_session"
+  },
+  {
     "name": "get_page_text",
     "description": "Extract raw text content from the page, prioritizing article content. Ideal for reading articles, blog posts, or other text-heavy pages. Returns plain text without HTML formatting. If you don't have a valid tab ID, use tabs_context_mcp first to get available tabs.",
     "inputSchema": {
@@ -192,6 +300,17 @@
         "tabId"
       ]
     }
+  },
+  {
+    "type": "object",
+    "properties": {
+      "createIfEmpty": {
+        "type": "boolean",
+        "description": "Creates a new MCP tab group if none exists, creates a new Window with a new tab group containing an empty tab (which can be used for this conversation). If a MCP tab group already exists, this parameter has no effect."
+      }
+    },
+    "required": [],
+    "name": "ensure_tab_group"
   },
   {
     "name": "tabs_create_mcp",
@@ -229,6 +348,60 @@
         "approach"
       ]
     }
+  },
+  {
+    "type": "object",
+    "properties": {
+      "tabId": {
+        "type": "number",
+        "description": "Tab ID to read console messages from. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+      },
+      "onlyErrors": {
+        "type": "boolean",
+        "description": "If true, only return error and exception messages. Default is false (return all message types)."
+      },
+      "clear": {
+        "type": "boolean",
+        "description": "If true, clear the console messages after reading to avoid duplicates on subsequent calls. Default is false."
+      },
+      "pattern": {
+        "type": "string",
+        "description": "Regex pattern to filter console messages. Only messages matching this pattern will be returned (e.g., 'error|warning' to find errors and warnings, 'MyApp' to filter app-specific logs). You should always provide a pattern to avoid getting too many irrelevant messages."
+      },
+      "limit": {
+        "type": "number",
+        "description": "Maximum number of messages to return. Defaults to 100. Increase only if you need more results."
+      }
+    },
+    "required": [
+      "tabId"
+    ],
+    "name": "get_console_logs"
+  },
+  {
+    "type": "object",
+    "properties": {
+      "tabId": {
+        "type": "number",
+        "description": "Tab ID to read network requests from. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+      },
+      "urlPattern": {
+        "type": "string",
+        "description": "Optional URL pattern to filter requests. Only requests whose URL contains this string will be returned (e.g., '/api/' to filter API calls, 'example.com' to filter by domain)."
+      },
+      "clear": {
+        "type": "boolean",
+        "description": "If true, clear the network requests after reading to avoid duplicates on subsequent calls. Default is false."
+      },
+      "limit": {
+        "type": "number",
+        "description": "Maximum number of requests to return. Defaults to 100. Increase only if you need more results."
+      }
+    },
+    "required": [
+      "tabId"
+    ],
+    "name": "get_network_activity"
   },
   {
     "name": "shortcuts_list",
