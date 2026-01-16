@@ -1,112 +1,78 @@
-import json
 import os
+import re
+import sys
 from google import genai
 from google.genai import types
 
-# 1. Load the "Truth" Mappings to ensure we are sane
-TRUTH_MAP = {
-    "${K9}": "Bash",
-    "${gI}": "Glob",
-    "${BI}": "Grep",
-    "${C3}": "Read", # This was the conflict point
-    "${f3}": "Edit",
-    "${eZ}": "Write"
-}
-
-print("--- 1. Verifying Persona Hydration ---")
-# Check Agent Engineer for artifacts
-with open("hydrated_personas/agent_engineer.md", "r") as f:
-    content = f.read()
+def extract_system_prompt(file_path):
+    """Extracts the 'Clean Text' block from the persona markdown."""
+    if not os.path.exists(file_path):
+        return None
+        
+    with open(file_path, "r") as f:
+        content = f.read()
     
-failed = False
-for var, name in TRUTH_MAP.items():
-    if var in content:
-        print(f"❌ CRITICAL FAIL: Found raw variable {var} in agent_engineer.md. Hydration incomplete.")
-        failed = True
-    # specific check for the C3/Bash mixup
-    if name == "Read" and "Read" not in content and "Bash" in content:
-         # This is a heuristic check, just seeing if Read is mentioned where we expect it
-         pass 
-
-if not failed:
-    print("✅ Personas appear cleanly hydrated.")
-else:
-    print("⚠️ Stopping. Please re-run 'python hydrate_personas.py' now that 'variable_map.json' is updated.")
-    exit()
-
-# 2. Fix Tool Schemas for Google GenAI SDK
-print("\n--- 2. Sanitizing Tool Schemas ---")
-
-# Load the reconstructed tools
-with open("core_tools_reconstructed.json", "r") as f:
-    raw_tools = json.load(f)
-
-sanitized_tools = []
-
-for tool in raw_tools:
-    # Anthropic extraction usually gives us { "type": "function", "function": { ... } }
-    # Google SDK often wants just the function declaration part for the list
+    # Try to find content between ```markdown and ``` markers
+    match = re.search(r"```markdown\s*(.*?)\s*```", content, re.DOTALL)
+    if match:
+        return match.group(1)
     
-    fn_data = tool.get("function", tool)
+    # Fallback: Return the whole content if no code blocks found
+    return content
+
+def run_agent_test():
+    print(f"--- 🚀 Initializing Gemini Hello System: AGENT_ENGINEER ---")
     
-    # Clean up 'required' fields - ensure they match properties
-    props = fn_data.get("parameters", {}).get("properties", {})
-    reqs = fn_data.get("parameters", {}).get("required", [])
+    # 1. Load the Persona
+    persona_path = "hydrated_personas/agent_engineer.md"
+    system_instruction = extract_system_prompt(persona_path)
     
-    # Filter required list to only include keys that actually exist in properties
-    valid_reqs = [r for r in reqs if r in props]
-    
-    tool_decl = types.Tool(
-        function_declarations=[
-            types.FunctionDeclaration(
-                name=fn_data.get("name"),
-                description=fn_data.get("description"),
-                parameters=types.Schema(
-                    type="OBJECT",
-                    properties={
-                        k: types.Schema(
-                            type=v.get("type", "STRING").upper(),
-                            description=v.get("description", "")
-                        ) for k, v in props.items()
-                    },
-                    required=valid_reqs
-                )
+    if not system_instruction:
+        print(f"❌ Error: Could not load persona from {persona_path}")
+        return False
+
+    print(f"✅ Loaded hydrated persona: {persona_path} ({len(system_instruction)} chars)")
+
+    # 2. Initialize Client
+    api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("❌ Error: API Key not found.")
+        return False
+        
+    client = genai.Client(api_key=api_key)
+
+    # 3. Execute Test
+    user_prompt = "Write a simple 'Hello World' script in Python. Explain how to run it."
+    print(f"--- 🧪 Executing Hello World Test ---")
+    print(f"USER >>> {user_prompt}\n")
+
+    try:
+        # Generate with the Agent's persona as system instruction
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=user_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.7 
             )
-        ]
-    )
-    sanitized_tools.append(tool_decl)
+        )
+        
+        print(f"[AGENT_ENGINEER]: {response.text}\n")
+        
+        # Simple Validation
+        if "print" in response.text and "Hello" in response.text:
+            print("--------------------------------------------------")
+            print("✅ TEST PASSED: Agent successfully generated code.")
+            return True
+        else:
+            print("⚠️ TEST WARNING: Output did not match expected 'Hello World' pattern.")
+            return False
 
-print(f"✅ Sanitized {len(sanitized_tools)} tools for Gemini.")
+    except Exception as e:
+        print(f"❌ Execution Failed: {e}")
+        return False
 
-# 3. The Live Test
-print("\n--- 3. Testing with Gemini API ---")
-client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
-
-sys_prompt = "You are a helpful assistant. Use the Bash tool to list files."
-
-try:
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        config=types.GenerateContentConfig(
-            tools=sanitized_tools,
-            system_instruction=sys_prompt,
-            temperature=0
-        ),
-        contents="List the files in the current directory."
-    )
-    
-    print("\nSTATUS: RESPONSE RECEIVED")
-    # Check if tool call happened
-    if response.candidates and response.candidates[0].content.parts:
-        for part in response.candidates[0].content.parts:
-            if part.function_call:
-                print(f"✅ SUCCESS! Model called tool: {part.function_call.name}")
-                print(f"   Args: {part.function_call.args}")
-            else:
-                print(f"Text response: {part.text}")
-    else:
-        print("⚠️ Response empty.")
-
-except Exception as e:
-    print(f"❌ API ERROR: {e}")
-    print("This usually means the schema is still slightly off. Check 'sanitized_tools' construction.")
+if __name__ == "__main__":
+    success = run_agent_test()
+    # Early stopping: Exit with error code if test fails
+    sys.exit(0 if success else 1)
