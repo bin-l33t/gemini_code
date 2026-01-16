@@ -12,39 +12,38 @@ def load_json(path):
 def merge():
     print("--- 🔗 Merging Tool Definitions ---")
     
-    # 1. Load Core Tools (Bash, Grep, etc.)
-    core = load_json('core_tools_reconstructed.json')
-    print(f"✅ Loaded {len(core)} Core Tools")
+    # 1. Load Tools extracted by extract_schemas_full.py
+    # In the sacrifice pipeline, this is the main source of truth
+    new_extracted = load_json('tools_def.json')
+    print(f"✅ Loaded {len(new_extracted)} Extracted Tools (from tools_def.json)")
 
-    # 2. Load Browser/Web Tools (MCP, Navigation)
-    # The browser tools might be a list of lists or a flat list, let's flatten if needed
-    raw_browser = load_json('gemini_browser_tools.json')
-    browser = []
+    # 2. Load Legacy/Browser Tools (Optional - keep if you plan to copy these files over)
+    core = load_json('core_tools_reconstructed.json')
+    if core: print(f"✅ Loaded {len(core)} Legacy Core Tools")
     
-    # Handle potential list-of-lists structure from extraction
-    if raw_browser and isinstance(raw_browser[0], list):
-        for sublist in raw_browser:
-            browser.extend(sublist)
+    browser = load_json('gemini_browser_tools.json')
+    if browser:
+        # Flatten if necessary
+        if isinstance(browser[0], list):
+            browser = [item for sublist in browser for item in sublist]
+        print(f"✅ Loaded {len(browser)} Browser Tools")
     else:
-        browser = raw_browser
-        
-    print(f"✅ Loaded {len(browser)} Browser Tools")
+        browser = []
 
     # 3. Combine
-    # Deduplicate by name just in case
+    # Deduplicate by name
     seen_names = set()
     master_list = []
     
-    for tool in core + browser:
+    # Prioritize 'new_extracted'
+    all_tools = new_extracted + core + browser
+    
+    for tool in all_tools:
         # Normalize structure (handle 'function' wrapper vs direct object)
-        if 'function' in tool: 
-            t_def = tool['function']
-        else:
-            t_def = tool
+        t_def = tool.get('function', tool)
             
         name = t_def.get('name')
         if name and name not in seen_names:
-            # Standardize for Gemini (remove 'function' wrapper if present for Pydantic/Gemini compat)
             master_list.append(t_def) 
             seen_names.add(name)
     
