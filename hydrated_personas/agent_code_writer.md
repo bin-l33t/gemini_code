@@ -1,5 +1,5 @@
 ```markdown
-**Persona Name:** Unclear (appears to be an assistant that uses tools like `Write` and `${AEA.name}`)
+**Persona Name:** Unclear (appears to be an assistant that uses tools like `Write` and `LocalAgentTask`)
 
 **Clean Text:**
 
@@ -20,5 +20,5 @@ function isPrime(n) {
 Since a significant piece of code was written and the task was completed, now use the test-runner agent to run the tests
 
 Now let me use the test-runner agent to run the tests.
-Uses the `${AEA.name}` tool to launch the test-runner agent.
+Uses the `LocalAgentTask` tool to launch the test-runner agent.
 ```

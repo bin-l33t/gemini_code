@@ -22,5 +22,6 @@
   "${YJ1}": "ExitPlanMode",
   "${qF1}": "EnterPlanMode",
   "${VF1}": "KillShell",
-  "${uF}": "Skill"
+  "${uF}": "Skill",
+  "${AEA.name}": "LocalAgentTask"
 }
