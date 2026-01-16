@@ -13,13 +13,12 @@ PORT = 8888
 PERSONA_FILE = "hydrated_personas/agent_engineer.md"
 MODEL_ID = "gemini-2.0-flash"
 
-# --- 1. Tool Implementations (Based on master_tool_definitions.json) ---
+# --- 1. Runtime Tool Definitions ---
 
 def Bash(command: str):
     """Executes a command in the bash shell. Use this to run system commands or scripts."""
     print(f"\n[SERVER] ⚡ Executing Bash: {command}")
     try:
-        # Timeout set to 30s to prevent hangs
         result = subprocess.run(
             command, shell=True, capture_output=True, text=True, timeout=30
         )
@@ -34,11 +33,9 @@ def Edit(path: str, content: str):
     """Writes content to a file (overwrites)."""
     print(f"\n[SERVER] ✏️ Editing file: {path}")
     try:
-        # Ensure directory exists
         os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
         with open(path, "w") as f:
             f.write(content)
-        print(f"[SERVER] ✅ File written ({len(content)} chars).")
         return f"Successfully wrote to {path}"
     except Exception as e:
         return f"Error writing file: {str(e)}"
@@ -56,7 +53,6 @@ def View(path: str):
 
 def Glob(pattern: str):
     """Lists files matching a pattern (e.g., *.py)."""
-    print(f"\n[SERVER] 🔍 Globbing: {pattern}")
     try:
         files = glob_module.glob(pattern, recursive=True)
         return "\n".join(files) if files else "No files found."
@@ -65,28 +61,25 @@ def Glob(pattern: str):
 
 def Grep(pattern: str, path: str):
     """Searches files for a pattern using grep."""
-    print(f"\n[SERVER] 🔦 Grepping '{pattern}' in {path}")
     try:
-        # Using subprocess for efficient grepping
         cmd = ["grep", "-r", pattern, path]
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=10
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
         return result.stdout if result.stdout else "No matches found."
     except Exception as e:
         return f"Error executing grep: {str(e)}"
 
 # --- 2. Agent Initialization ---
 
-print("🤖 INITIALIZING GEMINI CODE SERVER...")
+print("🤖 INITIALIZING GEMINI CODE SERVER (Single Page Mode)...")
 
 if not os.path.exists(PERSONA_FILE):
-    print(f"❌ Error: Persona file {PERSONA_FILE} not found. Ensure you are in the correct directory.")
-    sys.exit(1)
-
-with open(PERSONA_FILE, "r") as f:
-    SYSTEM_INSTRUCTION = f.read()
-print(f"✅ Loaded Persona: {PERSONA_FILE}")
+    # Fallback if specific persona missing, or creating a dummy for the test
+    print(f"⚠️  Warning: {PERSONA_FILE} not found. Using default engineer prompt.")
+    SYSTEM_INSTRUCTION = "You are an expert Software Engineer agent. You can execute bash commands, edit files, and view files."
+else:
+    with open(PERSONA_FILE, "r") as f:
+        SYSTEM_INSTRUCTION = f.read()
+    print(f"✅ Loaded Persona: {PERSONA_FILE}")
 
 api_key = os.environ.get("GEMINI_API_KEY")
 if not api_key:
@@ -95,7 +88,7 @@ if not api_key:
 
 client = genai.Client(api_key=api_key)
 
-# Global chat session to maintain context
+# Maintain chat history in the session
 chat_session = client.chats.create(
     model=MODEL_ID,
     config=types.GenerateContentConfig(
@@ -111,41 +104,75 @@ chat_session = client.chats.create(
 
 # --- 3. Server Implementation ---
 
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gemini Code Console</title>
+    <style>
+        body { font-family: 'Segoe UI', monospace; background: #1e1e1e; color: #d4d4d4; margin: 0; padding: 20px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box;}
+        h1 { color: #fff; margin-top: 0; font-size: 1.2rem; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        #chat-history { flex: 1; overflow-y: auto; background: #252526; border: 1px solid #3c3c3c; padding: 15px; margin-bottom: 15px; border-radius: 4px; }
+        .msg { margin-bottom: 15px; white-space: pre-wrap; line-height: 1.4; }
+        .user-msg { color: #4ec9b0; font-weight: bold; border-left: 3px solid #4ec9b0; padding-left: 10px; }
+        .agent-msg { color: #ce9178; border-left: 3px solid #ce9178; padding-left: 10px; }
+        form { display: flex; gap: 10px; height: 50px; }
+        textarea { flex: 1; background: #3c3c3c; color: #fff; border: 1px solid #007acc; border-radius: 4px; padding: 10px; resize: none; font-family: inherit; }
+        textarea:focus { outline: none; background: #444; }
+        button { background: #0e639c; color: white; border: none; padding: 0 20px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        button:hover { background: #1177bb; }
+    </style>
+</head>
+<body>
+    <h1>🤖 Gemini Code Console (Port 8888)</h1>
+    <div id="chat-history">
+        </div>
+    <form method="POST" action="/">
+        <textarea name="prompt" placeholder="Command (e.g. 'ls -la', 'create test.py')..." autofocus></textarea>
+        <button type="submit">Run</button>
+    </form>
+    <script>
+        // Auto-scroll to bottom
+        const history = document.getElementById('chat-history');
+        history.scrollTop = history.scrollHeight;
+        
+        // Submit on Enter (without Shift)
+        document.querySelector('textarea').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.querySelector('form').submit();
+            }
+        });
+    </script>
+</body>
+</html>
+"""
+
+# Simple in-memory history list
+history_log = []
+
 class GeminiHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/":
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
-            html = """
-            <html>
-            <head>
-                <title>Gemini Code Server</title>
-                <style>
-                    body { font-family: monospace; background: #1e1e1e; color: #d4d4d4; padding: 20px; }
-                    .container { max-width: 800px; margin: 0 auto; }
-                    textarea { width: 100%; height: 100px; background: #252526; color: #fff; border: 1px solid #3c3c3c; padding: 10px; }
-                    button { background: #0e639c; color: white; border: none; padding: 10px 20px; cursor: pointer; margin-top: 10px;}
-                    button:hover { background: #1177bb; }
-                    #response { white-space: pre-wrap; margin-top: 20px; background: #2d2d2d; padding: 15px; border: 1px solid #3c3c3c; }
-                    .user-msg { color: #4ec9b0; font-weight: bold; }
-                    .agent-msg { color: #ce9178; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>🤖 Gemini Code Server</h1>
-                    <form method="POST" action="/">
-                        <textarea name="prompt" placeholder="Enter your instructions (e.g., 'ls current dir', 'create a flask app')..."></textarea><br>
-                        <button type="submit">Execute Mission</button>
-                    </form>
-                    <div id="response"></div>
-                </div>
-            </body>
-            </html>
-            """
-            self.wfile.write(html.encode())
+            
+            # Render history
+            history_html = ""
+            for role, text in history_log:
+                css_class = "user-msg" if role == "USER" else "agent-msg"
+                # Basic escaping
+                safe_text = text.replace("<", "&lt;").replace(">", "&gt;")
+                history_html += f'<div class="msg {css_class}"><strong>{role}:</strong>\n{safe_text}</div>'
+            
+            if not history_log:
+                history_html = '<div class="msg agent-msg">System ready. Waiting for instructions...</div>'
+
+            response_html = HTML_TEMPLATE.replace("", history_html)
+            self.wfile.write(response_html.encode())
         else:
+            # Handle favicon or other requests
             super().do_GET()
 
     def do_POST(self):
@@ -156,62 +183,28 @@ class GeminiHandler(http.server.SimpleHTTPRequestHandler):
             user_prompt = params.get('prompt', [''])[0]
 
             if user_prompt:
-                print(f"\n📩 RECEIVED PROMPT: {user_prompt}")
+                print(f"\n📩 PROMPT: {user_prompt}")
+                history_log.append(("USER", user_prompt))
                 try:
+                    # Send message to Gemini with tools enabled
                     response = chat_session.send_message(user_prompt)
                     output_text = response.text
                 except Exception as e:
-                    output_text = f"❌ Error processing request: {str(e)}"
-            else:
-                output_text = "⚠️ Empty prompt received."
-
-            # Simple HTML response with the result
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
+                    output_text = f"❌ Error: {str(e)}"
+                
+                history_log.append(("GEMINI", output_text))
+            
+            # Redirect back to GET to prevent form resubmission on refresh
+            self.send_response(303)
+            self.send_header("Location", "/")
             self.end_headers()
-            
-            # Escape HTML for display
-            safe_output = output_text.replace("<", "&lt;").replace(">", "&gt;")
-            safe_prompt = user_prompt.replace("<", "&lt;").replace(">", "&gt;")
-            
-            html = f"""
-            <html>
-            <head>
-                <title>Gemini Code Server</title>
-                <style>
-                    body {{ font-family: monospace; background: #1e1e1e; color: #d4d4d4; padding: 20px; }}
-                    .container {{ max-width: 800px; margin: 0 auto; }}
-                    textarea {{ width: 100%; height: 100px; background: #252526; color: #fff; border: 1px solid #3c3c3c; padding: 10px; }}
-                    button {{ background: #0e639c; color: white; border: none; padding: 10px 20px; cursor: pointer; margin-top: 10px;}}
-                    .result-box {{ white-space: pre-wrap; margin-top: 20px; background: #2d2d2d; padding: 15px; border: 1px solid #3c3c3c; }}
-                    a {{ color: #4ec9b0; text-decoration: none; }}
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>🤖 Gemini Code Server</h1>
-                    <p><a href="/">&lt; Back to Console</a></p>
-                    <div class="result-box">
-                        <strong>USER:</strong> {safe_prompt}<br><br>
-                        <strong>GEMINI:</strong><br>{safe_output}
-                    </div>
-                </div>
-            </body>
-            </html>
-            """
-            self.wfile.write(html.encode())
-
-# --- 4. Main Execution ---
 
 if __name__ == "__main__":
-    # Ensure we are in the sacrifice directory or compatible env
     print(f"🌍 Working Directory: {os.getcwd()}")
     print(f"📡 Serving on Port {PORT}...")
-    
     with socketserver.TCPServer(("", PORT), GeminiHandler) as httpd:
-        print(f"✅ Server is Live! Access via http://localhost:{PORT}")
+        print(f"✅ Access via http://localhost:{PORT}")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
-            print("\n🛑 Server stopping...")
             httpd.server_close()
