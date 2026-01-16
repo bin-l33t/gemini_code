@@ -1,136 +1,122 @@
 import os
 import sys
 import subprocess
-import json
 from google import genai
 from google.genai import types
 
-# Configuration
+# --- Configuration ---
+PERSONA_FILE = "hydrated_personas/agent_engineer.md"
 MODEL_ID = "gemini-2.0-flash"
-PERSONA_PATH = "hydrated_personas/agent_engineer.md"
 
-# --- 1. Define the Bash Tool ---
-def execute_bash(command):
-    """Executes a bash command and returns stdout/stderr."""
+# --- Tool Implementations (The "Runtime") ---
+# These function names match the 'master_tool_definitions.json' extract
+
+def Bash(command: str):
+    """Executes a command in the bash shell. Use this to run python scripts."""
     print(f"\n[S] ⚡ Executing: {command}")
     try:
+        # Safety: Timeout to prevent hangs
         result = subprocess.run(
-            command, 
-            shell=True, 
-            capture_output=True, 
-            text=True, 
-            timeout=30
+            command, shell=True, capture_output=True, text=True, timeout=30
         )
         output = result.stdout + result.stderr
-        # Truncate if massive
-        if len(output) > 2000:
-            return output[:2000] + "... [truncated]"
+        # Truncate output if massive
+        display_out = output[:200] + "..." if len(output) > 200 else output
+        print(f"[S] 📤 Output: {display_out.strip()}")
         return output
     except Exception as e:
-        return f"Execution failed: {str(e)}"
+        return f"Error executing command: {str(e)}"
 
-# Schema for Gemini
-bash_tool_schema = {
-    "name": "Bash",
-    "description": "Execute a bash command on the local system. Use this to write files (echo/printf) or run scripts.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "command": {
-                "type": "string",
-                "description": "The bash command to execute."
-            }
-        },
-        "required": ["command"]
-    }
-}
+def Edit(path: str, content: str):
+    """Writes content to a file (overwrites)."""
+    print(f"\n[S] ✏️ Editing file: {path}")
+    try:
+        with open(path, "w") as f:
+            f.write(content)
+        print(f"[S] ✅ File written ({len(content)} chars).")
+        return f"Successfully wrote to {path}"
+    except Exception as e:
+        return f"Error writing file: {str(e)}"
 
-# --- 2. The Agent Logic ---
-class AutoAgent:
-    def __init__(self):
-        self.client = genai.Client(http_options={'api_version': 'v1alpha'})
-        self.system_instruction = self._load_persona()
-        self.history = []
-
-    def _load_persona(self):
-        if not os.path.exists(PERSONA_PATH):
-            # Fallback if hydrated path missing
-            return "You are an expert Software Engineer. You write and execute code to solve problems."
-        with open(PERSONA_PATH, "r") as f:
-            print(f"✅ Loaded Persona: {PERSONA_PATH}")
+def View(path: str):
+    """Reads a file from the filesystem."""
+    print(f"\n[S] 👁️ Viewing file: {path}")
+    if not os.path.exists(path):
+        return f"Error: File {path} not found."
+    try:
+        with open(path, "r") as f:
             return f.read()
+    except Exception as e:
+        return f"Error reading file: {str(e)}"
 
-    def run_mission(self, prompt):
-        print(f"\n🤖 AGENT MISSION: {prompt}")
+# --- The Agent ---
+
+def run_mission():
+    print("🤖 INITIALIZING GEMINI CODE AUTO-TEST SYSTEM...")
+    
+    # 1. Load Persona
+    if not os.path.exists(PERSONA_FILE):
+        print(f"❌ Error: Persona file {PERSONA_FILE} not found. Run the pipeline first!")
+        sys.exit(1)
         
-        # Start chat with tools
-        chat = self.client.chats.create(
-            model=MODEL_ID,
-            config=types.GenerateContentConfig(
-                system_instruction=self.system_instruction,
-                tools=[types.Tool(function_declarations=[bash_tool_schema])],
-                temperature=0.1 # Low temp for precise coding
+    with open(PERSONA_FILE, "r") as f:
+        system_instruction = f.read()
+    print(f"✅ Loaded Persona: {PERSONA_FILE}")
+
+    # 2. Initialize Client
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("❌ Error: GEMINI_API_KEY not found.")
+        sys.exit(1)
+    
+    client = genai.Client(api_key=api_key)
+
+    # 3. Define the Mission
+    user_prompt = (
+        "MISSION: \n"
+        "1. Create a python script named 'hello_math.py'.\n"
+        "2. Inside, print 'Hello Gemini Code'.\n"
+        "3. Also calculate the sum of 123456789 and 987654321 and print it.\n"
+        "4. Execute the script using python3 and show me the output.\n"
+        "IT NEEDS TO RUN AUTOMATICALLY."
+    )
+
+    print(f"\n🎯 MISSION: {user_prompt}\n" + "="*60)
+
+    # 4. Start Chat with Automatic Tool Execution
+    # We pass the python functions directly; the SDK handles serialization/execution
+    chat = client.chats.create(
+        model=MODEL_ID,
+        config=types.GenerateContentConfig(
+            system_instruction=system_instruction,
+            tools=[Bash, Edit, View], # Register our runtime tools
+            temperature=0.1, # Low temp for precise coding
+            automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                disable=False,
+                maximum_remote_calls=10 # Prevent infinite loops
             )
         )
-        
-        # Send initial message
-        response = chat.send_message(prompt)
-        self._handle_response_loop(chat, response)
-
-    def _handle_response_loop(self, chat, response):
-        """Loop to handle tool calls until text is generated."""
-        turn_limit = 10
-        current_turn = 0
-        
-        while current_turn < turn_limit:
-            current_turn += 1
-            part = response.candidates[0].content.parts[0]
-
-            # Case A: Tool Call (The Agent wants to do something)
-            if part.function_call:
-                fname = part.function_call.name
-                fargs = part.function_call.args
-                
-                if fname == "Bash":
-                    cmd = fargs.get("command")
-                    tool_output = execute_bash(cmd)
-                    
-                    # Send output back to Agent
-                    print(f"[S] 📤 Sending Tool Output ({len(tool_output)} chars)...")
-                    response = chat.send_message(
-                        types.Part.from_function_response(
-                            name="Bash",
-                            response={"result": tool_output}
-                        )
-                    )
-                else:
-                    print(f"❌ Unknown tool: {fname}")
-                    break
-            
-            # Case B: Text Response (The Agent is talking to us)
-            elif part.text:
-                print(f"\n[AGENT]: {part.text}")
-                if "1111111110" in part.text or "execution complete" in part.text.lower():
-                    print("\n✅ MISSION SUCCESS: Math verified in output.")
-                    break
-                # If it just talked but didn't run the code yet, we might need to nudge, 
-                # but usually it chains the tool call before final text.
-                break
-                
-            else:
-                print("⚠️ Unexpected response format.")
-                break
-
-# --- 3. Execution ---
-if __name__ == "__main__":
-    agent = AutoAgent()
-    
-    # The Request: Write code, Run code, Verify Math
-    mission = (
-        "1. Create a python script named 'hello_math.py'. "
-        "2. Inside, print 'Hello Gemini Code'. "
-        "3. Also calculate the sum of 123456789 and 987654321 and print it. "
-        "4. Execute the script using python3 and show me the output."
     )
+
+    # 5. Execute
+    response = chat.send_message(user_prompt)
     
-    agent.run_mission(mission)
+    print("\n" + "="*60)
+    print(f"🤖 [AGENT REPORT]:\n{response.text}")
+    print("="*60)
+
+    # 6. Verification
+    print("\n🔎 VERIFYING OUTPUT...")
+    if os.path.exists("hello_math.py"):
+        print("✅ 'hello_math.py' exists.")
+        output = subprocess.getoutput("python3 hello_math.py")
+        if "1111111110" in output:
+             print("✅ Math verified (1111111110 found).")
+             print("✨ TEST PASSED: Gemini Code is Operational.")
+        else:
+             print(f"⚠️ Math verification failed. Output:\n{output}")
+    else:
+        print("❌ 'hello_math.py' was NOT created.")
+
+if __name__ == "__main__":
+    run_mission()
