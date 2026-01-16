@@ -30,14 +30,14 @@
             "type": "string",
             "description": "The search pattern."
           },
-          "path": {
+          "filename": {
             "type": "string",
-            "description": "The path to the file to search."
+            "description": "The file to search in."
           }
         },
         "required": [
           "pattern",
-          "path"
+          "filename"
         ]
       }
     }
@@ -46,17 +46,17 @@
     "type": "function",
     "function": {
       "name": "View",
-      "description": "Reads and displays the contents of a file.",
+      "description": "Reads the content of a file.",
       "parameters": {
         "type": "object",
         "properties": {
-          "path": {
+          "filename": {
             "type": "string",
-            "description": "The path to the file to view."
+            "description": "The file to read."
           }
         },
         "required": [
-          "path"
+          "filename"
         ]
       }
     }
@@ -65,21 +65,21 @@
     "type": "function",
     "function": {
       "name": "Edit",
-      "description": "Modifies the contents of a file.",
+      "description": "Modifies a file.",
       "parameters": {
         "type": "object",
         "properties": {
-          "path": {
+          "filename": {
             "type": "string",
-            "description": "The path to the file to edit."
+            "description": "The file to modify."
           },
           "content": {
             "type": "string",
-            "description": "The new content to write to the file."
+            "description": "The new content of the file."
           }
         },
         "required": [
-          "path",
+          "filename",
           "content"
         ]
       }
@@ -95,7 +95,7 @@
         "properties": {
           "pattern": {
             "type": "string",
-            "description": "The glob pattern to match."
+            "description": "The glob pattern to match files."
           }
         },
         "required": [

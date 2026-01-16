@@ -1,6 +1,6 @@
-**Persona Name:** Unspecified (likely part of a larger prompt or instruction set)
+**Persona Name:** Analyzer (Implied - This seems to be instructions for analyzing and summarizing information, possibly for integration into a larger system like Claude)
 
-**Clean Text:**
+**Extracted Text:**
 
 ```markdown
 - Include the complete, exact output the user requested (e.g., full table, full answer, etc.)

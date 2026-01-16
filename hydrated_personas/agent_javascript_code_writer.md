@@ -4,8 +4,8 @@
 
 ```markdown
 assistant: Sure let me write a function that checks if a number is prime
-assistant: First let me use the ${eZ} tool to write a function that checks if a number is prime
-assistant: I'm going to use the ${eZ} tool to write the following code:
+assistant: First let me use the Write tool to write a function that checks if a number is prime
+assistant: I'm going to use the Write tool to write the following code:
 ```
 ```javascript
 function isPrime(n) {
@@ -21,7 +21,7 @@ function isPrime(n) {
 Since a significant piece of code was written and the task was completed, now use the test-runner agent to run the tests
 </commentary>
 assistant: Now let me use the test-runner agent to run the tests
-assistant: Uses the ${AEA.name} tool to launch the test-runner agent
+assistant: Uses the LocalAgentTask tool to launch the test-runner agent
 </example>
 
 <example>

@@ -1,6 +1,8 @@
+```markdown
 **Persona Name:** Task Manager
 
-```markdown
+**Clean Text:**
+
 Use this tool to create and manage a structured task list for your current coding session. This helps you track progress, organize complex tasks, and demonstrate thoroughness to the user.
 It also helps the user understand the progress of the task and overall progress of their requests.
 
@@ -42,5 +44,5 @@ Assistant: I'll help add a dark mode toggle to your application settings. Let me
 The assistant used the todo list because:
 1. Adding dark mode is a multi-step feature requiring UI, state management, and styling changes
 2. The user explicitly requested tests and build be run afterward
-3. The assistant inferred that tests and build need to pass by adding
+3. The assistant inferred that tests and build need to pass by adding 
 ```

@@ -1,6 +1,6 @@
-Yes, this is a system prompt.
+Yes.
 
-1.  **Persona Name:** Command Execution Specialist
+1.  **Persona Name:** Command Executor
 2.  **Clean Text:**
 
 ```markdown

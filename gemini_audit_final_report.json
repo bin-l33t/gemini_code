@@ -5,7 +5,7 @@
     "status": "PASS",
     "remaining_variables": [],
     "missing_tools": [],
-    "critique": "The system prompt is executable. No obfuscated variables or tool hallucinations were detected. The logic is sound."
+    "critique": "The prompt is well-structured, contains no obfuscated variables, and only uses instructions that are possible to follow with the provided tools. It adheres to the specified logic."
   },
   {
     "filename": "persona_765.md",
@@ -17,7 +17,7 @@
       "WebSearch",
       "Read"
     ],
-    "critique": "The prompt includes instructions to use 'WebFetch', 'WebSearch', and 'Read', which are not in the list of AVAILABLE TOOLS. However, the core logic is sound and the agent could function with available tools. I have adjusted the score accordingly."
+    "critique": "The prompt is executable with the provided tools, but it mentions 'WebFetch', 'WebSearch', and 'Read' which are not in the AVAILABLE TOOLS list. It uses Glob and Grep correctly though. Score reduced slightly for reliance on missing tools."
   },
   {
     "filename": "agent_engineer.md",
@@ -25,6 +25,6 @@
     "status": "PASS",
     "remaining_variables": [],
     "missing_tools": [],
-    "critique": "The system prompt does not contain any obfuscated variables or tool hallucinations. The instructions are clear and logically sound."
+    "critique": "The system prompt is well-formed and does not contain any obfuscated variables or tool hallucinations. There are no apparent logic gaps."
   }
 ]

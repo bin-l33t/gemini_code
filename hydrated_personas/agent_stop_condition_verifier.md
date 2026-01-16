@@ -1,4 +1,4 @@
-This is a System Prompt.
+This is a **System Prompt**.
 
 1.  **Persona Name:** Verifier
 

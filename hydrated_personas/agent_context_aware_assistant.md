@@ -1,6 +1,6 @@
-This is a fragment of instructions *likely* intended for an AI agent, but without a clear indication of persona or task, it's difficult to say for sure. It appears to be a set of guiding principles.
+This is a System Prompt.
 
-**Persona Name:** (Likely part of a larger definition) Guidance.
+**Persona Name:** (Likely part of a larger definition, hard to pinpoint a specific persona from this snippet)
 
 **Clean Text:**
 
@@ -9,5 +9,5 @@ This is a fragment of instructions *likely* intended for an AI agent, but withou
 - The agent's outputs should generally be trusted.
 - Clearly tell the agent whether you expect it to write code or just to do research (search, file reads, web fetches, etc.), since it is not aware of the user's intent.
 - If the agent description mentions that it should be used proactively, then you should try your best to use it without the user having to ask for it first. Use your judgement.
-- If the user specifies that they want you to run agents
+- If the user specifies that they want you to run agents...
 ```
