@@ -15,7 +15,6 @@ mkdir -p "$TARGET_DIR"
 echo "✅ Target directory ready: $TARGET_DIR"
 
 # 2. Migration: Copy ONLY the Golden Path files
-# We ignore the old 'v1' scripts and 'audit' messes.
 echo "📦 Migrating essential files..."
 
 FILES_TO_COPY=(
@@ -25,7 +24,7 @@ FILES_TO_COPY=(
     # Utilities & Setup
     "test_genai.py"
     "parse_usage.py"
-    "requirements.txt"  # If you have one, otherwise ignore
+    "requirements.txt"
     
     # Step 2: Mining (Prompt Extraction)
     "mine_prompts.py"
@@ -38,7 +37,7 @@ FILES_TO_COPY=(
     
     # Step 5: Sanitization
     "sanitize_map.py"
-    "master_variable_map.json" # Copy existing map as a baseline if valid
+    "master_variable_map.json"
     
     # Step 6: Hydration
     "hydrate_personas_v2.py"
@@ -71,7 +70,8 @@ echo "✅ npm package installed."
 
 # 4. Execution
 echo "🔥 executing Streamlined Pipeline..."
-# We run the orchestrator which handles the sequence
-python3 pipeline_orchestrator.py
+# UPDATE: Pass all shell arguments ("$@") to the python script
+# This allows you to run: ./deploy_sacrifice.sh --limit 500
+python3 pipeline_orchestrator.py "$@"
 
 echo "✨ Deployment and Execution Complete. Check $TARGET_DIR for results."

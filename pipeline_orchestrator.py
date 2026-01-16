@@ -1,15 +1,20 @@
 import os
 import subprocess
 import time
+import argparse
 
-def run_step(script_name, description):
+def run_step(script_name, description, extra_args=None):
     print(f"\n🚀 --- STEP: {description} ({script_name}) ---")
     start = time.time()
     if not os.path.exists(script_name):
         print(f"❌ Error: Script {script_name} not found.")
         return False
     
-    result = subprocess.run(["python3", script_name], capture_output=True, text=True)
+    cmd = ["python3", script_name]
+    if extra_args:
+        cmd.extend(extra_args)
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode == 0:
         print(f"✅ Success ({time.time() - start:.2f}s)")
         # Print first few lines of output to show progress
@@ -21,13 +26,18 @@ def run_step(script_name, description):
         return False
 
 def main():
-    print("🤖 GEMINI REVERSE ENGINEERING ORCHESTRATOR 🤖")
+    parser = argparse.ArgumentParser(description="Gemini Reverse Engineering Orchestrator")
+    parser.add_argument("--limit", type=int, default=200, help="Mining limit for prompt extraction (Default: 200)")
+    args = parser.parse_args()
+
+    print(f"🤖 GEMINI REVERSE ENGINEERING ORCHESTRATOR 🤖 (Limit: {args.limit})")
     
     # 1. Verification of Environment
     if not run_step("test_genai.py", "Verifying Gemini API Access"): exit(1)
 
     # 2. Extract Raw Prompts (CRITICAL: Creates 'extracted_personas' dir)
-    if not run_step("mine_prompts.py", "Mining System Prompts from CLI"): exit(1)
+    # We pass the limit argument here
+    if not run_step("mine_prompts.py", "Mining System Prompts from CLI", extra_args=["--limit", str(args.limit)]): exit(1)
 
     # 3. Hunt for Variables (The 'Smart Hunt' logic)
     if not run_step("smart_hunt.py", "Hunting for Variable Definitions"): exit(1)

@@ -1,14 +1,20 @@
 import os
 import re
 import json
+import argparse
 from google import genai
 from google.genai import types
+
+# --- ARGUMENT PARSING ---
+parser = argparse.ArgumentParser(description="Mine System Prompts from Minified JS")
+parser.add_argument("--limit", type=int, default=200, help="Maximum number of candidate strings to process (Default: 200 for full run)")
+args = parser.parse_args()
 
 # --- CONFIGURATION ---
 TARGET_FILE = "node_modules/@anthropic-ai/claude-code/cli.js"
 OUTPUT_DIR = "extracted_personas"
 MIN_STRING_LENGTH = 500  # Prompts are usually long
-MAX_CANDIDATES = 15      # LIMIT for testing (Process only top 15 longest strings)
+MAX_CANDIDATES = args.limit
 MODEL_ID = "gemini-2.0-flash"
 
 client = genai.Client(http_options={'api_version': 'v1alpha'})
@@ -16,6 +22,10 @@ client = genai.Client(http_options={'api_version': 'v1alpha'})
 # --- THE PROMPT MINER ---
 def extract_string_literals(filepath):
     print(f"--- Reading {filepath} ---")
+    if not os.path.exists(filepath):
+        print(f"❌ Error: File {filepath} not found.")
+        return []
+
     with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
         content = f.read()
     
@@ -36,7 +46,7 @@ def extract_string_literals(filepath):
     
     print(f"✅ Found {len(candidates)} candidate strings > {MIN_STRING_LENGTH} chars.")
     if len(candidates) > MAX_CANDIDATES:
-        print(f"⚠️  Limiting to top {MAX_CANDIDATES} longest candidates for this run.")
+        print(f"⚠️  Limiting to top {MAX_CANDIDATES} longest candidates (Limit set by --limit).")
         return candidates[:MAX_CANDIDATES]
         
     return candidates
@@ -78,6 +88,10 @@ if __name__ == "__main__":
 
     candidates = extract_string_literals(TARGET_FILE)
     
+    if not candidates:
+        print("❌ No candidates found or file missing.")
+        exit(1)
+
     print(f"--- Analyzing {len(candidates)} candidates with {MODEL_ID} ---")
     
     found_count = 0
