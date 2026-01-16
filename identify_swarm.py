@@ -43,6 +43,11 @@ def main():
     
     results = []
     
+    # Check if directory exists
+    if not os.path.exists(directory):
+        print(f"❌ Directory '{directory}' not found.")
+        return
+
     for f in os.listdir(directory):
         if f.startswith("persona_") and f.endswith(".md"):
             path = os.path.join(directory, f)
@@ -51,13 +56,25 @@ def main():
             
             try:
                 info = identify_persona(f, content)
-                print(f"✅ {f} -> {info['filename']} ({info['role']})")
                 
-                # Renaissance: Rename the file
-                new_path = os.path.join(directory, info['filename'])
-                os.rename(path, new_path)
+                # --- FIX START: Handle List vs Dict return ---
+                if isinstance(info, list):
+                    if len(info) > 0:
+                        info = info[0]
+                    else:
+                        raise ValueError("Gemini returned an empty list.")
+                # --- FIX END ---
+
+                print(f"✅ {f} -> {info.get('filename', 'UNKNOWN')} ({info.get('role', 'UNKNOWN')})")
                 
-                results.append(info)
+                if 'filename' in info:
+                    # Renaissance: Rename the file
+                    new_path = os.path.join(directory, info['filename'])
+                    os.rename(path, new_path)
+                    results.append(info)
+                else:
+                    print(f"⚠️  Skipping {f}: No filename in response.")
+
             except Exception as e:
                 print(f"❌ Failed to identify {f}: {e}")
 

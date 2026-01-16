@@ -1,127 +1,27 @@
 [
   {
-    "role": "Task Automation Agent",
-    "filename": "agent_task_automation.md",
-    "description": "This agent manages and executes tasks based on a to-do list, responding to user requests and tracking task states."
+    "role": "Sudoku Solver",
+    "filename": "persona_sudoku_solver.md",
+    "description": "This agent implements a hint system for a Sudoku game, selecting the most helpful cell to reveal to the user based on various strategies."
   },
   {
-    "role": "Conversation Summarizer",
-    "filename": "agent_conversation_summarizer.md",
-    "description": "This agent summarizes conversations, focusing on technical details, code patterns, architectural decisions, and user requests to maintain context for ongoing development."
+    "role": "Documentation Analyzer",
+    "filename": "agent_documentation_analyzer.md",
+    "description": "This agent analyzes documentation to understand its purpose and structure."
   },
   {
     "role": "Verifier",
-    "filename": "persona_verifier.md",
-    "description": "This agent verifies that Claude Code has completed the given plan by inspecting the codebase and conversation history, and then returns whether the stop condition has been met."
+    "filename": "agent_verifier.md",
+    "description": "This agent verifies that Claude Code has completed the given plan by inspecting the codebase and conversation transcript."
   },
   {
-    "role": "Plan Mode Re-entry Assistant",
-    "filename": "agent_plan_mode_re_entry_assistant.md",
-    "description": "This agent assists in re-entering plan mode by reviewing the existing plan, evaluating the user's current request, and deciding how to proceed: starting fresh or modifying the existing plan."
-  },
-  {
-    "role": "Browser Operator",
-    "filename": "agent_browser_operator.md",
-    "description": "This agent uses a mouse and keyboard to interact with a web browser, take screenshots, and accurately click on elements."
-  },
-  {
-    "role": "Todo List Assistant",
-    "filename": "agent_todo_list_assistant.md",
-    "description": "This agent uses todo lists to break down complex tasks into manageable steps and track progress systematically."
-  },
-  {
-    "role": "Claude Guide Agent",
-    "filename": "agent_claude_guide.md",
-    "description": "This agent helps users understand and use Claude Code, the Claude Agent SDK, and the Claude API effectively by providing guidance based on official documentation and referencing project files."
-  },
-  {
-    "role": "Command Execution Specialist",
-    "filename": "agent_command_execution_specialist.md",
-    "description": "This agent executes bash commands efficiently and safely for Claude Code, following git safety protocols and providing clear error reporting."
-  },
-  {
-    "role": "Debugging Assistant",
-    "filename": "agent_debugger.md",
-    "description": "This agent assists in debugging by adding console logs to a specified function to understand the flow of values."
-  },
-  {
-    "role": "Task Manager",
-    "filename": "agent_task_manager.md",
-    "description": "This agent manages tasks by resuming previous agent states or starting fresh with detailed prompts for autonomous execution."
-  },
-  {
-    "role": "Result Completer",
-    "filename": "agent_result_completer.md",
-    "description": "This agent focuses on delivering complete and actionable results, avoiding redundancy with existing information and managing length by prioritizing essential details."
-  },
-  {
-    "role": "Sudoku Solver Assistant",
-    "filename": "persona_sudoku_solver.md",
-    "description": "This agent assists the user in solving a Sudoku puzzle by providing hints, prioritizing cells with only one possible value or those in highly constrained areas."
-  },
-  {
-    "role": "Browser Automation Assistant",
-    "filename": "agent_browser_automation.md",
-    "description": "This agent automates browser tasks, interacts with web elements, and handles tab management while prioritizing user guidance and avoiding loops."
-  },
-  {
-    "role": "Code Analysis and Modification Agent",
-    "filename": "agent_claude_code.md",
-    "description": "This agent analyzes codebases, searches for specific code elements, and modifies code files when necessary, using tools like Grep, Glob, and Read to complete tasks related to code understanding and manipulation."
-  },
-  {
-    "role": "Task Manager",
-    "filename": "agent_task_manager.md",
-    "description": "This agent creates and manages a structured task list to track progress, organize complex tasks, and demonstrate thoroughness."
-  },
-  {
-    "role": "Coding Assistant",
-    "filename": "agent_reflective_assistant.md",
-    "description": "This agent acts as a reflective coding assistant, summarizing key aspects of a coding session to improve understanding and efficiency."
-  },
-  {
-    "role": "Task Manager and Planner",
-    "filename": "agent_task_manager.md",
-    "description": "This agent uses a TodoWrite tool to manage, plan, and track tasks, ensuring thoroughness and user visibility into its progress by breaking down larger tasks into smaller, manageable steps and marking them as completed."
-  },
-  {
-    "role": "Stop Condition Verifier",
-    "filename": "agent_stop_condition_verifier.md",
-    "description": "This agent verifies that a given stop condition has been met in Claude Code by inspecting the codebase and conversation transcript."
-  },
-  {
-    "role": "Title and Branch Namer",
-    "filename": "agent_title_and_branch_namer.md",
-    "description": "This agent generates a succinct title and git branch name for a coding session based on a provided description, ensuring clarity and conciseness."
-  },
-  {
-    "role": "Conversation Summarizer",
-    "filename": "agent_conversation_summarizer.md",
-    "description": "This agent focuses on creating detailed summaries of conversations, capturing technical details, code patterns, and architectural decisions to maintain context for ongoing development work."
-  },
-  {
-    "role": "Code Development Agent",
-    "filename": "agent_code_developer.md",
-    "description": "This agent prioritizes using specialized tools and a Planner subagent within the Notebook tool for code exploration and development tasks."
-  },
-  {
-    "role": "File Search Specialist",
-    "filename": "agent_file_search_specialist.md",
-    "description": "This agent specializes in efficiently searching and analyzing codebases in read-only mode using glob patterns, regex, and file reading."
-  },
-  {
-    "role": "Browser Automation Assistant",
-    "filename": "agent_browser_automation_assistant.md",
-    "description": "This agent automates tasks within a web browser, handling tab management, element interaction, and error recovery while prioritizing user guidance."
+    "role": "Guidance Agent",
+    "filename": "agent_guidance.md",
+    "description": "This agent provides guidance on how to interact with other agents, clarifying expectations and proactively offering assistance."
   },
   {
     "role": "Command Execution Specialist",
     "filename": "persona_command_execution_specialist.md",
-    "description": "This agent executes bash commands efficiently and safely, following specific guidelines for git operations and error handling."
-  },
-  {
-    "role": "JavaScript Code Writer",
-    "filename": "agent_javascript_code_writer.md",
-    "description": "This agent writes JavaScript code snippets based on user requests, focusing on functionality and clarity."
+    "description": "This agent is responsible for executing bash commands efficiently and safely within Claude Code."
   }
 ]
