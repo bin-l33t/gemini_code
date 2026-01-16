@@ -8,6 +8,7 @@ from google.genai import types
 TARGET_FILE = "node_modules/@anthropic-ai/claude-code/cli.js"
 OUTPUT_DIR = "extracted_personas"
 MIN_STRING_LENGTH = 500  # Prompts are usually long
+MAX_CANDIDATES = 15      # LIMIT for testing (Process only top 15 longest strings)
 MODEL_ID = "gemini-2.0-flash"
 
 client = genai.Client(http_options={'api_version': 'v1alpha'})
@@ -18,24 +19,26 @@ def extract_string_literals(filepath):
     with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
         content = f.read()
     
-    # Regex to find double-quoted or single-quoted strings (basic approximation for minified JS)
-    # We look for large chunks of text that look like prompts
-    print("--- Scanning for large text blobs (this may take a moment) ---")
-    
-    # This regex looks for string literals. It's not a perfect JS parser but works for mining.
-    # We capture typical prompt markers to filter noise.
+    print("--- Scanning for large text blobs ---")
     candidates = []
     
-    # Strategy: Split by quotes and filter by length. faster than complex regex on minified files.
+    # Strategy: Split by quotes and filter by length
     fragments = re.split(r'["`]', content)
     
     for frag in fragments:
         if len(frag) > MIN_STRING_LENGTH:
-            # simple heuristic: Prompts usually contain "You are" or "Assistant" or "Tool"
+            # Heuristic: Prompts usually contain "You are" or "Assistant" or "Tool"
             if " " in frag and ("You are" in frag or "function" in frag or "context" in frag):
                 candidates.append(frag)
-                
+    
+    # OPTIMIZATION: Sort by length (descending) to find main prompts first
+    candidates.sort(key=len, reverse=True)
+    
     print(f"✅ Found {len(candidates)} candidate strings > {MIN_STRING_LENGTH} chars.")
+    if len(candidates) > MAX_CANDIDATES:
+        print(f"⚠️  Limiting to top {MAX_CANDIDATES} longest candidates for this run.")
+        return candidates[:MAX_CANDIDATES]
+        
     return candidates
 
 # --- THE GEMINI ANALYZER ---
@@ -57,7 +60,6 @@ def analyze_candidate(text_chunk, index):
     {text_chunk[:15000]} 
     --- RAW TEXT END ---
     """
-    # Note: Truncating to 15k chars to be safe, though Flash handles 1M.
     
     try:
         response = client.models.generate_content(
@@ -76,11 +78,11 @@ if __name__ == "__main__":
 
     candidates = extract_string_literals(TARGET_FILE)
     
-    print(f"--- analyzing {len(candidates)} candidates with {MODEL_ID} ---")
+    print(f"--- Analyzing {len(candidates)} candidates with {MODEL_ID} ---")
     
     found_count = 0
     for i, candidate in enumerate(candidates):
-        print(f"Processing candidate {i+1}/{len(candidates)} (Length: {len(candidate)})...", end="\r")
+        print(f"Processing candidate {i+1}/{len(candidates)} (Length: {len(candidate)})...")
         
         result = analyze_candidate(candidate, i)
         
@@ -91,9 +93,10 @@ if __name__ == "__main__":
             if "Planner" in result: filename = "agent_planner.md"
             elif "Architect" in result: filename = "agent_architect.md"
             elif "Engineer" in result or "Coder" in result: filename = "agent_engineer.md"
+            elif "Guide" in result: filename = "agent_guide.md"
             
             with open(os.path.join(OUTPUT_DIR, filename), "w") as f:
                 f.write(result)
-            print(f"\n✅ MATCH FOUND! Saved to {filename}")
+            print(f"   ✅ MATCH: Saved to {filename}")
 
-    print(f"\n\n--- Extraction Complete. Found {found_count} personas. ---")
+    print(f"\n--- Extraction Complete. Found {found_count} personas. ---")

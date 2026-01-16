@@ -12,8 +12,8 @@ def run_step(script_name, description):
     result = subprocess.run(["python3", script_name], capture_output=True, text=True)
     if result.returncode == 0:
         print(f"✅ Success ({time.time() - start:.2f}s)")
-        # Optional: print first few lines of output to show progress
-        print("\n".join(result.stdout.split('\n')[:3]))
+        # Print first few lines of output to show progress
+        print("\n".join(result.stdout.split('\n')[:5]))
         return True
     else:
         print(f"🛑 FAILED")
@@ -26,11 +26,10 @@ def main():
     # 1. Verification of Environment
     if not run_step("test_genai.py", "Verifying Gemini API Access"): exit(1)
 
-    # 2. Extract Raw Prompts (If not already done, but safe to rerun)
-    # run_step("mine_prompts.py", "Mining System Prompts from CLI") 
+    # 2. Extract Raw Prompts (CRITICAL: Creates 'extracted_personas' dir)
+    if not run_step("mine_prompts.py", "Mining System Prompts from CLI"): exit(1)
 
     # 3. Hunt for Variables (The 'Smart Hunt' logic)
-    # We combine the best logic from your hunt scripts here
     if not run_step("smart_hunt.py", "Hunting for Variable Definitions"): exit(1)
     
     # 4. Merge results into the master map
