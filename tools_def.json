@@ -1,0 +1,274 @@
+[
+  {
+    "name": "unknown_tool",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "Must be set to 'javascript_exec'"
+        },
+        "text": {
+          "type": "string",
+          "description": "The JavaScript code to execute. The code will be evaluated in the page context. The result of the last expression will be returned automatically. Do NOT use 'return' statements - just write the expression you want to evaluate (e.g., 'window.myData.value' not 'return window.myData.value'). You can access and modify the DOM, call page functions, and interact with page variables."
+        },
+        "tabId": {
+          "type": "number",
+          "description": "Tab ID to execute the code in. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+        }
+      },
+      "required": [
+        "action",
+        "text",
+        "tabId"
+      ]
+    }
+  },
+  {
+    "name": "resize_window",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number",
+          "description": "Target window width in pixels"
+        },
+        "height": {
+          "type": "number",
+          "description": "Target window height in pixels"
+        },
+        "tabId": {
+          "type": "number",
+          "description": "Tab ID to get the window for. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "tabId"
+      ]
+    }
+  },
+  {
+    "name": "unknown_tool",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "start_recording",
+            "stop_recording",
+            "export",
+            "clear"
+          ],
+          "description": "Action to perform: 'start_recording' (begin capturing), 'stop_recording' (stop capturing but keep frames), 'export' (generate and export GIF), 'clear' (discard frames)"
+        },
+        "tabId": {
+          "type": "number",
+          "description": "Tab ID to identify which tab group this operation applies to"
+        },
+        "download": {
+          "type": "boolean",
+          "description": "Always set this to true for the 'export' action only. This causes the gif to be downloaded in the browser."
+        },
+        "filename": {
+          "type": "string",
+          "description": "Optional filename for exported GIF (default: 'recording-[timestamp].gif'). For 'export' action only."
+        },
+        "options": {
+          "type": "object",
+          "description": "Optional GIF enhancement options for 'export' action. Properties: showClickIndicators (bool), showDragPaths (bool), showActionLabels (bool), showProgressBar (bool), showWatermark (bool), quality (number 1-30). All default to true except quality (default: 10).",
+          "properties": {
+            "showClickIndicators": {
+              "type": "boolean",
+              "description": "Show orange circles at click locations (default: true)"
+            },
+            "showDragPaths": {
+              "type": "boolean",
+              "description": "Show red arrows for drag actions (default: true)"
+            },
+            "showActionLabels": {
+              "type": "boolean",
+              "description": "Show black labels describing actions (default: true)"
+            },
+            "showProgressBar": {
+              "type": "boolean",
+              "description": "Show orange progress bar at bottom (default: true)"
+            },
+            "showWatermark": {
+              "type": "boolean",
+              "description": "Show Claude logo watermark (default: true)"
+            },
+            "quality": {
+              "type": "number",
+              "description": "GIF compression quality, 1-30 (lower = better quality, slower encoding). Default: 10"
+            }
+          }
+        }
+      },
+      "required": [
+        "action",
+        "tabId"
+      ]
+    }
+  },
+  {
+    "name": "get_page_text",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "tabId": {
+          "type": "number",
+          "description": "Tab ID to extract text from. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+        }
+      },
+      "required": [
+        "tabId"
+      ]
+    }
+  },
+  {
+    "name": "unknown_tool",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "createIfEmpty": {
+          "type": "boolean",
+          "description": "Creates a new MCP tab group if none exists, creates a new Window with a new tab group containing an empty tab (which can be used for this conversation). If a MCP tab group already exists, this parameter has no effect."
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "tabs_create_mcp",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "update_plan",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of domains you will visit (e.g., ['github.com', 'stackoverflow.com']). These domains will be approved for the session when the user accepts the plan."
+        },
+        "approach": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "High-level description of what you will do. Focus on outcomes and key actions, not implementation details. Be concise - aim for 3-7 items."
+        }
+      },
+      "required": [
+        "domains",
+        "approach"
+      ]
+    }
+  },
+  {
+    "name": "unknown_tool",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "tabId": {
+          "type": "number",
+          "description": "Tab ID to read console messages from. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+        },
+        "onlyErrors": {
+          "type": "boolean",
+          "description": "If true, only return error and exception messages. Default is false (return all message types)."
+        },
+        "clear": {
+          "type": "boolean",
+          "description": "If true, clear the console messages after reading to avoid duplicates on subsequent calls. Default is false."
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Regex pattern to filter console messages. Only messages matching this pattern will be returned (e.g., 'error|warning' to find errors and warnings, 'MyApp' to filter app-specific logs). You should always provide a pattern to avoid getting too many irrelevant messages."
+        },
+        "limit": {
+          "type": "number",
+          "description": "Maximum number of messages to return. Defaults to 100. Increase only if you need more results."
+        }
+      },
+      "required": [
+        "tabId"
+      ]
+    }
+  },
+  {
+    "name": "unknown_tool",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "tabId": {
+          "type": "number",
+          "description": "Tab ID to read network requests from. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+        },
+        "urlPattern": {
+          "type": "string",
+          "description": "Optional URL pattern to filter requests. Only requests whose URL contains this string will be returned (e.g., '/api/' to filter API calls, 'example.com' to filter by domain)."
+        },
+        "clear": {
+          "type": "boolean",
+          "description": "If true, clear the network requests after reading to avoid duplicates on subsequent calls. Default is false."
+        },
+        "limit": {
+          "type": "number",
+          "description": "Maximum number of requests to return. Defaults to 100. Increase only if you need more results."
+        }
+      },
+      "required": [
+        "tabId"
+      ]
+    }
+  },
+  {
+    "name": "shortcuts_list",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "tabId": {
+          "type": "number",
+          "description": "Tab ID to list shortcuts from. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+        }
+      },
+      "required": [
+        "tabId"
+      ]
+    }
+  },
+  {
+    "name": "unknown_tool",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "tabId": {
+          "type": "number",
+          "description": "Tab ID to execute the shortcut on. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+        },
+        "shortcutId": {
+          "type": "string",
+          "description": "The ID of the shortcut to execute"
+        },
+        "command": {
+          "type": "string",
+          "description": "The command name of the shortcut to execute (e.g., 'debug', 'summarize'). Do not include the leading slash."
+        }
+      },
+      "required": [
+        "tabId"
+      ]
+    }
+  }
+]

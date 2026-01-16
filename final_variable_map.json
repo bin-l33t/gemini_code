@@ -1,0 +1,13 @@
+{
+  "${mW.name}": "Todo",
+  "${EE}": "StructuredOutput",
+  "${K9}": "Bash",
+  "${gI}": "Glob",
+  "${BI}": "Grep",
+  "${f3}": "Edit",
+  "${eZ}": "Write",
+  "${C3}": "Read",
+  "${b3}": "Notebook",
+  "${A}": "View",
+  "${Q}": "utf-8"
+}

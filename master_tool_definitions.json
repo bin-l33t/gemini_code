@@ -1,0 +1,249 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "Bash",
+      "description": "Executes commands in a bash shell.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The command to execute."
+          }
+        },
+        "required": [
+          "command"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Grep",
+      "description": "Searches files for a pattern.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "The search pattern."
+          },
+          "path": {
+            "type": "string",
+            "description": "The path to the file to search."
+          }
+        },
+        "required": [
+          "pattern",
+          "path"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "View",
+      "description": "Reads and displays the contents of a file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "The path to the file to view."
+          }
+        },
+        "required": [
+          "path"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Edit",
+      "description": "Modifies the contents of a file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "The path to the file to edit."
+          },
+          "content": {
+            "type": "string",
+            "description": "The new content to write to the file."
+          }
+        },
+        "required": [
+          "path",
+          "content"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Glob",
+      "description": "Lists files matching a pattern.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "The glob pattern to match."
+          }
+        },
+        "required": [
+          "pattern"
+        ]
+      }
+    }
+  },
+  {
+    "name": "read_page",
+    "description": "Get an accessibility tree representation of elements on the page. By default returns all elements including non-visible ones. Output is limited to 50000 characters. If the output exceeds this limit, you will receive an error asking you to specify a smaller depth or focus on a specific element using ref_id. Optionally filter for only interactive elements. If you don't have a valid tab ID, use tabs_context_mcp first to get available tabs.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filter": {
+          "type": "string",
+          "enum": [
+            "interactive",
+            "all"
+          ],
+          "description": "Filter elements: \"interactive\" for buttons/links/inputs only, \"all\" for all elements including non-visible ones (default: all elements)"
+        }
+      }
+    }
+  },
+  {
+    "name": "form_input",
+    "description": "Set values in form elements using element reference ID from the read_page tool. If you don't have a valid tab ID, use tabs_context_mcp first to get available tabs.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "Element reference ID from the read_page tool (e.g., \"ref_1\", \"ref_2\")"
+        },
+        "value": {
+          "type": [
+            "string",
+            "boolean",
+            "number"
+          ],
+          "description": "The value to set. For checkboxes use boolean, for selects use option value or text, for other inputs use appropriate string/number"
+        },
+        "tabId": {
+          "type": "number",
+          "description": "Tab ID to set form value in. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+        }
+      },
+      "required": [
+        "ref",
+        "value",
+        "tabId"
+      ]
+    }
+  },
+  {
+    "name": "resize_window",
+    "description": "Resize the current browser window to specified dimensions. Useful for testing responsive designs or setting up specific screen sizes. If you don't have a valid tab ID, use tabs_context_mcp first to get available tabs.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number",
+          "description": "Target window width in pixels"
+        },
+        "height": {
+          "type": "number",
+          "description": "Target window height in pixels"
+        },
+        "tabId": {
+          "type": "number",
+          "description": "Tab ID to get the window for. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "tabId"
+      ]
+    }
+  },
+  {
+    "name": "get_page_text",
+    "description": "Extract raw text content from the page, prioritizing article content. Ideal for reading articles, blog posts, or other text-heavy pages. Returns plain text without HTML formatting. If you don't have a valid tab ID, use tabs_context_mcp first to get available tabs.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "tabId": {
+          "type": "number",
+          "description": "Tab ID to extract text from. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+        }
+      },
+      "required": [
+        "tabId"
+      ]
+    }
+  },
+  {
+    "name": "tabs_create_mcp",
+    "title": "Tabs Create",
+    "description": "Creates a new empty tab in the MCP tab group. CRITICAL: You must get the context using tabs_context_mcp at least once before using other browser automation tools so you know what tabs exist.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "update_plan",
+    "description": "Present a plan to the user for approval before taking actions. The user will see the domains you intend to visit and your approach. Once approved, you can proceed with actions on the approved domains without additional permission prompts.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of domains you will visit (e.g., ['github.com', 'stackoverflow.com']). These domains will be approved for the session when the user accepts the plan."
+        },
+        "approach": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "High-level description of what you will do. Focus on outcomes and key actions, not implementation details. Be concise - aim for 3-7 items."
+        }
+      },
+      "required": [
+        "domains",
+        "approach"
+      ]
+    }
+  },
+  {
+    "name": "shortcuts_list",
+    "description": "List all available shortcuts and workflows (shortcuts and workflows are interchangeable). Returns shortcuts with their commands, descriptions, and whether they are workflows. Use shortcuts_execute to run a shortcut or workflow.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "tabId": {
+          "type": "number",
+          "description": "Tab ID to list shortcuts from. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."
+        }
+      },
+      "required": [
+        "tabId"
+      ]
+    }
+  }
+]

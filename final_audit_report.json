@@ -1,0 +1,33 @@
+[
+  {
+    "filename": "agent_engineer.md",
+    "executability_score": 95,
+    "obfuscated_vars": [],
+    "phantom_tools": [],
+    "logic_issues": [],
+    "verdict": "PASS"
+  },
+  {
+    "filename": "agent_planner.md",
+    "executability_score": 20,
+    "obfuscated_vars": [
+      "${A.planFilePath}",
+      "${M$.name}"
+    ],
+    "phantom_tools": [],
+    "logic_issues": [
+      "The prompt mentions editing the plan file but does not specify which tool to use for that, creating a logic gap. While an `Edit` tool is available, it is not explicitly called out.",
+      "The instruction to read the existing plan file lacks instruction about what tool to use. While `View` is available, it is not explicitly specified.",
+      "The instruction to start a 'fresh' planning session is vague given that no planning tools are specified. There is only the `Edit` Tool available."
+    ],
+    "verdict": "FAIL"
+  },
+  {
+    "filename": "agent_architect.md",
+    "executability_score": 100,
+    "obfuscated_vars": [],
+    "phantom_tools": [],
+    "logic_issues": [],
+    "verdict": "PASS"
+  }
+]

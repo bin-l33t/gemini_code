@@ -1,0 +1,16 @@
+# --- Dependencies ---
+node_modules/
+__pycache__/
+*.py[cod]
+*.class
+venv/
+.env
+
+# --- System ---
+.DS_Store
+.vscode/
+
+# --- Generated Reports (Optional - keep if you want history) ---
+# gemini_audit_report.json
+# final_audit_report.json
+# gemini_audit_final_report.json

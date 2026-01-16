@@ -1,0 +1,14 @@
+{
+    "${A}": "path",
+    "${Q}": "encoding",
+    "${mW.name}": "TodoWrite",
+    "${EE}": "StructuredOutput",
+    "${K9}": "Bash",
+    "${BI}": "Grep",
+    "${gI}": "Glob",
+    "${f3}": "Edit",
+    "${eZ}": "Write",
+    "${b3}": "Notebook",
+    "${C3}": "Read",
+    "${Tq}": "NotebookEdit"
+}

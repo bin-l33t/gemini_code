@@ -1,0 +1,52 @@
+--- Found 17 potential tool schemas ---
+
+[Schema 1]
+{type:"object",properties:{action:{type:"string",description:"Must be set to 'javascript_exec'"}
+
+[Schema 2]
+{type:"object",properties:{filter:{type:"string",enum:["interactive","all"],description:'Filter elements: "interactive" for buttons/links/inputs only, "all" for all elements including non-visible ones (default: all elements)'}
+
+[Schema 3]
+{type:"object",properties:{query:{type:"string",description:'Natural language description of what to find (e.g., "search bar", "add to cart button", "product title containing organic")'}
+
+[Schema 4]
+{type:"object",properties:{ref:{type:"string",description:'Element reference ID from the read_page tool (e.g., "ref_1", "ref_2")'}
+
+[Schema 5]
+{type:"object",properties:{action:{type:"string",enum:["left_click","right_click","type","screenshot","wait","scroll","key","left_click_drag","double_click","triple_click","zoom","scroll_to","hover"],description:"The action to perform:\n* `left_click`: Click the left mouse button at the specified coordinates.\n* `right_click`: Click the right mouse button at the specified coordinates to open context menus.\n* `double_click`: Double-click the left mouse button at the specified coordinates.\n* `tr...
+
+[Schema 6]
+{type:"object",properties:{url:{type:"string",description:'The URL to navigate to. Can be provided with or without protocol (defaults to https://). Use "forward" to go forward in history or "back" to go back in history.'}
+
+[Schema 7]
+{type:"object",properties:{width:{type:"number",description:"Target window width in pixels"}
+
+[Schema 8]
+{type:"object",properties:{action:{type:"string",enum:["start_recording","stop_recording","export","clear"],description:"Action to perform: 'start_recording' (begin capturing), 'stop_recording' (stop capturing but keep frames), 'export' (generate and export GIF), 'clear' (discard frames)"}
+
+[Schema 9]
+{type:"object",properties:{imageId:{type:"string",description:"ID of a previously captured screenshot (from the computer tool's screenshot action) or a user-uploaded image"}
+
+[Schema 10]
+{type:"object",properties:{tabId:{type:"number",description:"Tab ID to extract text from. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."}}
+
+[Schema 11]
+{type:"object",properties:{createIfEmpty:{type:"boolean",description:"Creates a new MCP tab group if none exists, creates a new Window with a new tab group containing an empty tab (which can be used for this conversation). If a MCP tab group already exists, this parameter has no effect."}}
+
+[Schema 12]
+{type:"object",properties:{}
+
+[Schema 13]
+{type:"object",properties:{domains:{type:"array",items:{type:"string"}
+
+[Schema 14]
+{type:"object",properties:{tabId:{type:"number",description:"Tab ID to read console messages from. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."}
+
+[Schema 15]
+{type:"object",properties:{tabId:{type:"number",description:"Tab ID to read network requests from. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."}
+
+[Schema 16]
+{type:"object",properties:{tabId:{type:"number",description:"Tab ID to list shortcuts from. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."}}
+
+[Schema 17]
+{type:"object",properties:{tabId:{type:"number",description:"Tab ID to execute the shortcut on. Must be a tab in the current group. Use tabs_context_mcp first if you don't have a valid tab ID."}

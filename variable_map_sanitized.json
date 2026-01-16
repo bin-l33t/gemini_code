@@ -1,0 +1,23 @@
+{
+  "${K9}": "Bash",
+  "${BI}": "Grep",
+  "${gI}": "Glob",
+  "${C3}": "Read",
+  "${f3}": "Edit",
+  "${eZ}": "Write",
+  "${Tq}": "NotebookEdit",
+  "${EE}": "StructuredOutput",
+  "${mI}": "WebFetch",
+  "${BR}": "WebSearch",
+  "${nF5}": "https://code.claude.com/docs/en/claude_code_docs_map.md",
+  "${DI2}": "https://platform.claude.com/llms.txt",
+  "${aF5}": "claude",
+  "${JI2}": "Bash",
+  "${mW.name}": "TodoWrite",
+  "${A.planFilePath}": "PLAN.md",
+  "${M$.name}": "update_plan",
+  "${A$.name}": "Edit",
+  "${Q$.name}": "Edit",
+  "${$Y}": "Ask",
+  "${mS.agentType}": "Planner"
+}

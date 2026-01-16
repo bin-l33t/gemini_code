@@ -1,0 +1,26 @@
+[
+  {
+    "filename": "agent_planner.md",
+    "status": "FAIL",
+    "obfuscated_variables": [
+      "${A.planFilePath}",
+      "${M$.name}"
+    ],
+    "missing_tools": [],
+    "logic_critique": "The system prompt contains obfuscated variables that need to be resolved. The prompt states to edit the plan file, but doesn't provide what tool to use in order to edit it."
+  },
+  {
+    "filename": "persona_768.md",
+    "status": "PASS",
+    "obfuscated_variables": [],
+    "missing_tools": [],
+    "logic_critique": "The system prompt provides detailed instructions for generating a summary of a conversation. The instructions are comprehensive and include specific sections for analyzing user requests, technical concepts, file modifications, errors, problem-solving, pending tasks, current work, and potential next steps. The prompt also provides examples of how the output should be structured, and instructions on summarization focus."
+  },
+  {
+    "filename": "persona_694.md",
+    "status": "PASS",
+    "obfuscated_variables": [],
+    "missing_tools": [],
+    "logic_critique": "No issues found. The provided text does not contain obfuscated variables, phantom tool references, or logical gaps."
+  }
+]
