@@ -1,0 +1,19 @@
+Create auto_test_agent_v4.py by combining the best parts of auto_test_agent_v2.py and auto_test_agent_v3.py.
+
+Context:
+
+auto_test_agent_v2.py contains the correct Agent Logic (imports google.genai, defines run_mission, loads personas, and executes the loop).
+
+auto_test_agent_v3.py contains the correct Tool Logic (specifically fixing path expansion with os.path.expanduser and robust file handling), but it mistakenly removed the entire Agent and genai integration, rendering it useless as an agent.
+
+Instructions for v4:
+
+Base Structure: Use auto_test_agent_v2.py as your scaffold. You MUST preserve the genai imports, the run_mission function, the persona loading, and the __main__ execution block.
+
+Tool Upgrade: Replace the Bash, Edit, and View functions in v2 with the improved logic from v3.
+
+Critical Fix: Ensure all file paths in Edit and View are processed with os.path.expanduser(path) (from v3) to support ~/ home directory syntax.
+
+Output Formatting: While v3 returns dictionaries (e.g., {'success': True...}), v2 printed helpful logs to the console (e.g., [S] ⚡ Executing...). In v4, keep the v2 console logging so I can see what the agent is doing in real-time, but use the robust file/path handling of v3.
+
+Final Output: The script must be a fully functional executable that runs the Gemini agent loop, not just a tool test script.
