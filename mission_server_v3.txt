@@ -1,0 +1,25 @@
+OBJECTIVE: Create `gemini_server_v3.py` and a dual-boot script to fix crashes and implement agent identity.
+
+PHASE 1: ANALYZE
+1. Read `gemini_server_v2.py` to understand the current implementation.
+2. Note the bug in `do_GET`: `text.replace` fails when `text` is None.
+3. Note the bug in `do_POST`: `response.text` can be None.
+
+PHASE 2: IMPLEMENT `gemini_server_v3.py`
+Create a new server file with these changes:
+1.  **Identity Arguments**: Use `argparse` to accept `--name` (default "Agent") and `--port` (default 8080).
+2.  **Context Injection**: In the `GenerateContentConfig` `system_instruction`, append a dynamic footer:
+    "SYSTEM CONTEXT: You are {name}. You are running on port {port}. You have permission to manage the process on port {other_port} if needed."
+3.  **Bug Fix**: In `do_POST`, handle `None` responses:
+    `output_text = response.text if response.text else "(No text output)"`
+4.  **Display Fix**: In `do_GET`, ensure safety:
+    `safe_text = (text or "").replace("<", "&lt;").replace(">", "&gt;")`
+5.  **Tools**: Ensure the `Bash` tool is enabled so the agent can run commands like `lsof -t -i:8081 | xargs kill` to stop the other server.
+
+PHASE 3: ORCHESTRATE
+Create a shell script `start_dual_swarm.sh`:
+1.  Starts Instance A: `python3 gemini_server_v3.py --name "Alpha" --port 8080` (backgrounded).
+2.  Starts Instance B: `python3 gemini_server_v3.py --name "Beta"  --port 8081` (backgrounded).
+3.  Prints the PIDs and access URLs.
+
+EXECUTE THIS PLAN AUTOMATICALLY.
