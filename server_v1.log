@@ -5,3 +5,72 @@
 127.0.0.1 - - [19/Jan/2026 17:43:48] "POST / HTTP/1.1" 303 -
 127.0.0.1 - - [19/Jan/2026 17:44:09] "POST / HTTP/1.1" 303 -
 127.0.0.1 - - [19/Jan/2026 17:44:09] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [19/Jan/2026 18:03:53] "POST / HTTP/1.1" 303 -
+127.0.0.1 - - [19/Jan/2026 18:03:54] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [19/Jan/2026 18:05:39] "POST / HTTP/1.1" 303 -
+127.0.0.1 - - [19/Jan/2026 18:05:40] "GET / HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 51036)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/socketserver.py", line 316, in _handle_request_noblock
+    self.process_request(request, client_address)
+  File "/usr/lib/python3.10/socketserver.py", line 347, in process_request
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.10/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python3.10/http/server.py", line 668, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.10/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/usr/lib/python3.10/http/server.py", line 433, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.10/http/server.py", line 421, in handle_one_request
+    method()
+  File "/home/ubuntu/gemini_code/gemini_server_v1.py", line 161, in do_GET
+    safe_text = text.replace("<", "&lt;").replace(">", "&gt;")
+AttributeError: 'NoneType' object has no attribute 'replace'
+----------------------------------------
+127.0.0.1 - - [19/Jan/2026 18:05:58] "GET / HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 60164)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/socketserver.py", line 316, in _handle_request_noblock
+    self.process_request(request, client_address)
+  File "/usr/lib/python3.10/socketserver.py", line 347, in process_request
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.10/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python3.10/http/server.py", line 668, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.10/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/usr/lib/python3.10/http/server.py", line 433, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.10/http/server.py", line 421, in handle_one_request
+    method()
+  File "/home/ubuntu/gemini_code/gemini_server_v1.py", line 161, in do_GET
+    safe_text = text.replace("<", "&lt;").replace(">", "&gt;")
+AttributeError: 'NoneType' object has no attribute 'replace'
+----------------------------------------
+127.0.0.1 - - [19/Jan/2026 18:06:08] "GET / HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 60178)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/socketserver.py", line 316, in _handle_request_noblock
+    self.process_request(request, client_address)
+  File "/usr/lib/python3.10/socketserver.py", line 347, in process_request
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.10/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python3.10/http/server.py", line 668, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.10/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/usr/lib/python3.10/http/server.py", line 433, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.10/http/server.py", line 421, in handle_one_request
+    method()
+  File "/home/ubuntu/gemini_code/gemini_server_v1.py", line 161, in do_GET
+    safe_text = text.replace("<", "&lt;").replace(">", "&gt;")
+AttributeError: 'NoneType' object has no attribute 'replace'
+----------------------------------------
