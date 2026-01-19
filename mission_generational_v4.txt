@@ -1,0 +1,27 @@
+OBJECTIVE: Create `gemini_server_v4.py` to implement "Generational Succession" (The Phoenix Pattern).
+
+PHASE 1: CONCEPT
+The current "Dual Swarm" approach creates siblings. We want "Lineage."
+The New Agent (Younger) must be able to detect the Old Agent (Older) on the target port, kill it, and take its place.
+
+PHASE 2: IMPLEMENT `gemini_server_v4.py`
+Copy `gemini_server_v3.py` to `gemini_server_v4.py` and modify the startup logic:
+1.  **Add Argument**: Add a `--force` or `--predatory` flag to `argparse`.
+2.  **Predatory Binding Logic**:
+    Inside the startup sequence, before `socketserver.TCPServer`:
+    a. Check if the target `PORT` is in use.
+    b. If in use AND `--force` is True:
+       - Identify the PID of the process holding `PORT` (use `lsof -t -i:{PORT}`).
+       - Print: "⚔️  Younger (v4) is displacing Older (PID: {pid})..."
+       - Kill the process (`os.kill(pid, signal.SIGTERM)`).
+       - Wait briefly for the socket to release.
+    c. If in use AND `--force` is False:
+       - Exit with error: "Port {PORT} is busy. Use --force to displace."
+3.  **Bind**: Proceed to start the server on `PORT`.
+
+PHASE 3: DEPLOYMENT SCRIPT
+Create `evolve_agent.sh`:
+1.  Execute: `python3 gemini_server_v4.py --name "Agent_v4" --port 8080 --force`
+2.  This command should successfully kill any running v3 (or v2) agent on port 8080 and take over the port immediately.
+
+EXECUTE THIS PLAN AUTOMATICALLY.
