@@ -1,0 +1,20 @@
+OBJECTIVE: Clear port 8888 and spawn a sub-agent to deploy a new server.
+
+STEP 1: CHECK & CLEAN PORT 8888
+Check if any process is currently listening on port 8888 (using lsof, netstat, or ss).
+If a process is found, identify its PID and kill it immediately to free the port. Verify the port is free before proceeding.
+
+STEP 2: PREPARE RECURSIVE MISSION
+Create a new file named 'inner_mission.txt' containing the following instructions for a distinct agent:
+"""
+1. Create a directory '~/gemini_code_test' if it doesn't exist.
+2. Inside that directory, write a Python script 'server.py' that runs a simple HTTP server on port 8888.
+3. Start the server using 'nohup python3 server.py > server.log 2>&1 &'.
+   IMPORTANT: You MUST run it in the background with nohup so the command returns immediately and does not hang the agent.
+4. Verify the server is running by checking the 'server.log' or using 'curl' on localhost:8888.
+"""
+
+STEP 3: EXECUTE RECURSIVE AGENT
+Run a new instance of the agent using the current script 'auto_test_agent_v4.py'.
+Pass 'inner_mission.txt' as the prompt file argument.
+Ensure you capture the output of this sub-agent to confirm it successfully deployed the server.

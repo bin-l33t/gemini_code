@@ -1,0 +1,11 @@
+You are tasked with a forensic audit of a local service.
+
+1.  **Identify the Process:** Find out which process ID (PID) is currently listening on port 8888.
+2.  **Trace the Origin:** strict requirement: Determine the exact "Current Working Directory" (CWD) from which that process was launched. Do not guess; use system tools (like `pwdx`, `ls -l /proc/<PID>/cwd`, or `ps`) to verify the directory.
+3.  **Analyze the Source:** Locate the python script running this server. Read its full content using your View tool.
+4.  **Assess Complexity:** Analyze the code to determine its purpose.
+    * Is this merely a standard `SimpleHTTPRequestHandler` that lists files?
+    * Or does it contain custom application logic (e.g., handling POST requests, API integration, or a UI)?
+    * Specifically, check if it integrates with any LLM SDKs or defines custom tools.
+
+Output a final report summarizing the CWD, the script name, and your assessment of the server's complexity.
