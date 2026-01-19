@@ -1,0 +1,5 @@
+MISSION:
+1. Create a new directory named '~/gemini_code_test' (ensure you expand the user path).
+2. Inside that directory, create a python script named 'fibonacci.py'.
+3. The script should calculate and print the first 10 numbers of the Fibonacci sequence.
+4. Execute the script using python3 to verify it works and show the output.
