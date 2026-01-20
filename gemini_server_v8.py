@@ -13,6 +13,7 @@ import signal
 import time
 import cgi
 import uuid
+import traceback
 
 # --- Argument Parsing ---
 parser = argparse.ArgumentParser(description='Gemini Code Server with Agent Identity')
@@ -225,13 +226,22 @@ class GeminiHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path == "/":
             # Parse the form data
-            form = cgi.FieldStorage(
-                fp=self.rfile,
-                headers=self.headers,
-                environ={'REQUEST_METHOD': 'POST',
-                         'CONTENT_TYPE': self.headers['Content-Type']
-                         }
-            )
+            try:
+                form = cgi.FieldStorage(
+                    fp=self.rfile,
+                    headers=self.headers,
+                    environ={'REQUEST_METHOD': 'POST',
+                             'CONTENT_TYPE': self.headers['Content-Type']
+                             }
+                )
+            except Exception as e:
+                print(f"\n❌ Error initializing cgi.FieldStorage: {e}", file=sys.stderr)
+                traceback.print_exc(file=sys.stderr)
+                self.send_response(500)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(b"<h1>500 Internal Server Error</h1><p>Failed to process form data.</p>")
+                return
 
             # Extract the model choice
             model_choice = form.getvalue('model_choice')
@@ -344,7 +354,7 @@ if __name__ == "__main__":
     #    sys.exit(1)
 
     print(f"📡 Serving on Port {PORT}...")
-    with socketserver.TCPServer(("", PORT), GeminiHandler) as httpd:
+    with socketserver.ThreadingTCPServer(("", PORT), GeminiHandler) as httpd:
         print(f"✅ Server started on port {PORT}")
         try:
             httpd.serve_forever()
