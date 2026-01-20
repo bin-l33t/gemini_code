@@ -1,0 +1,16 @@
+OBJECTIVE: Verify if "Agent_v4" is successfully running on Port 8080.
+
+Step 1: Process Check
+Check if the python process is running.
+Command: ps aux | grep gemini_server_v4.py
+
+Step 2: Port Check
+Check if Port 8080 is currently being listened to.
+Command: lsof -i :8080
+
+Step 3: Identity Verification
+Perform a curl request to the local server to verify the Agent's name in the HTML response.
+Command: curl -s http://localhost:8080 | grep "Agent_v4"
+
+Step 4: Report
+If the process is running, the port is open, and "Agent_v4" is found in the HTML, report "SUCCESS: Generation 4 is active." Otherwise, report failure details.

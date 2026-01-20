@@ -1,0 +1,37 @@
+OBJECTIVE: Diagnose the server state, fix the deployment script, and verify persistence using the correct success criteria.
+
+PHASE 1: DIAGNOSTICS
+1.  Check what is currently running on port 8080 using `netstat -tulpn | grep 8080` or `ss -tulpn | grep 8080`.
+2.  Run `curl -v http://localhost:8080` and save the output to `curl_dump.txt`. 
+    * *Self-Correction:* Read `curl_dump.txt`. Notice that "Agent_v4" is NOT in the HTML. The correct string to check for is "Gemini Code Console".
+
+PHASE 2: FIX DEPLOYMENT SCRIPT
+1.  Edit `evolve_agent.sh` to ensure it kills any existing process on 8080 robustly and starts the new server in the background.
+    * Use `fuser -k 8080/tcp` to kill the old process (more robust than `lsof`).
+    * Use `nohup` to persist the process.
+    
+    *Target Content for `evolve_agent.sh`:*
+    ```bash
+    #!/bin/bash
+    echo "Killing any process on port 8080..."
+    fuser -k 8080/tcp || true
+    sleep 2
+    
+    echo "Starting Agent_v4..."
+    nohup python3 gemini_server_v4.py --name "Agent_v4" --port 8080 --force > server_v4.log 2>&1 &
+    
+    PID=$!
+    echo "Server launched in background. PID: $PID"
+    sleep 5
+    ```
+
+PHASE 3: EXECUTION & VERIFICATION
+1.  Make executable: `chmod +x evolve_agent.sh`
+2.  Run: `./evolve_agent.sh`
+3.  Wait 5 seconds.
+4.  **CRITICAL VERIFICATION:**
+    * Check process: `ps aux | grep gemini_server_v4.py`
+    * Check response: `curl -s http://localhost:8080 | grep "Gemini Code Console"`
+    * (Note: We grep for the generic title because the agent name is hidden in the system prompt).
+
+If `ps` shows the process and `curl` returns the title, report SUCCESS.

@@ -1,0 +1,21 @@
+OBJECTIVE: Fix the deployment script to persist the server in the background and verify it remains active.
+
+Phase 1: Fix Deployment Script
+The previous deployment failed because the server ran in the foreground, causing the agent to time out and kill it.
+1. Edit `evolve_agent.sh` to run the server in the background using `nohup` and detach it.
+   New Content:
+   #!/bin/bash
+   nohup python3 gemini_server_v4.py --name "Agent_v4" --port 8080 --force > server_v4.log 2>&1 &
+   echo "Server launched in background. PID: $!"
+
+Phase 2: Execution
+1. Ensure the script is executable (`chmod +x evolve_agent.sh`).
+2. Run `./evolve_agent.sh`.
+
+Phase 3: Verification
+1. Wait 5 seconds to ensure startup stabilizes.
+2. Check if the process is still running: `ps aux | grep gemini_server_v4.py`
+3. Verify the server is responding: `curl -s http://localhost:8080 | grep "Agent_v4"`
+4. Check the logs for successful binding: `cat server_v4.log`
+
+If the process is listed and curl returns the agent name, report SUCCESS.
