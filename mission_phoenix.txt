@@ -1,0 +1,21 @@
+MISSION: OPERATION PHOENIX RECOVERY
+
+1. RECON:
+   - Run `id` to confirm our permissions.
+   - Run `curl -v http://localhost:8080` to confirm the "Hello World" zombie is active.
+   - Find the PID of the zombie using `lsof -t -i:8080` OR `ss -lptn 'sport = :8080'`.
+
+2. KILL:
+   - Kill that PID. 
+   - Check the exit code. If it fails (permission denied), try `SudoBash`.
+   - Verify the port is free (`ss -lptn`).
+
+3. DEPLOY:
+   - Find `gemini_server_v7.py`.
+   - Create a script `start_v7.sh` that sources `~/.bashrc` (for API keys) and runs the server on port 8080 using `nohup`.
+   - Run the script.
+
+4. VERIFY:
+   - Run `curl -v http://localhost:8080`.
+   - IF the output contains "<!DOCTYPE html>", report SUCCESS.
+   - IF the output is `{"message":"Hello World"}`, report FAILURE (Zombie survived).
