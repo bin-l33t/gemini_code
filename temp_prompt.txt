@@ -1,0 +1,22 @@
+MISSION: Fix the crash in gemini_server_v8.py where submitting a chat prompt without a file causes a KeyError.
+
+1. SETUP:
+   - Create a file named 'test_server_integrity.py' with the following content:
+     [INSERT CONTENT OF test_server_integrity.py FROM ABOVE HERE]
+
+2. DIAGNOSE:
+   - Run 'test_server_integrity.py' to confirm the server crashes (fails the POST test).
+   - Read 'gemini_server_v8.py'. Look at the 'do_POST' method around line 241.
+   - The log shows "KeyError: 'uploaded_file'". This means 'form["uploaded_file"]' is being accessed unsafely.
+
+3. EXECUTE FIX:
+   - Edit 'gemini_server_v8.py'.
+   - Replace the unsafe access with a safe check.
+   - USE THIS LOGIC: "if 'uploaded_file' in form and form['uploaded_file'].filename:"
+   - ENSURE that we do NOT try to access form['uploaded_file'] if it is not in the form keys.
+   - Hint: The cgi module can be tricky. Use "form.getvalue('uploaded_file')" or strictly check keys first.
+
+4. VERIFY:
+   - Restart the server (kill the old PID on port 8888 or 8080 first).
+   - Run 'test_server_integrity.py' again.
+   - Verify that both tests PASS.
