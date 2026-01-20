@@ -1,0 +1,18 @@
+MISSION PROFILE: FIX AND LAUNCH LATEST SERVER
+
+1. RECONNAISSANCE:
+   - Use 'InspectPort(8080)' and 'InspectPort(8888)' to identify any lingering server processes (check for 'python3', 'gemini_server', or 'v7'/'v8' scripts).
+
+2. CLEANUP:
+   - If any process is found on these ports, use 'KillProcess(pid)' to terminate them immediately.
+   - Ensure the ports are free before proceeding.
+
+3. DEPLOYMENT:
+   - Start the most advanced server available: 'gemini_server_v8.py'.
+   - Use the command: `python3 gemini_server_v8.py --port 8888 --name Agent_v8 > server_v8.log 2>&1 &`
+   - Note: We are using port 8888 as it is the v8 default and "reasonable" for avoiding conflicts with standard 8080 web services.
+
+4. VERIFICATION:
+   - Wait 3 seconds.
+   - Use 'InspectPort(8888)' to confirm the NEW process is running and listening.
+   - Read the first 10 lines of 'server_v8.log' using 'Bash' (head -n 10) to ensure no startup errors occurred.
