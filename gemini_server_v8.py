@@ -150,7 +150,7 @@ HTML_TEMPLATE = """
     <div id="chat-history">
         {{CHAT_HISTORY}}
     </div>
-    <form method="POST" action="/">
+    <form method="POST" action="/" enctype="multipart/form-data">
         <label for="model_choice">Choose a model:</label>
         <select name="model_choice" id="model_choice">
           <option value="gemini-2.0-flash">gemini-2.0-flash</option>
@@ -238,8 +238,8 @@ class GeminiHandler(http.server.SimpleHTTPRequestHandler):
             print(f"\n[SERVER] Model Choice: {model_choice}")
 
             # Handle the uploaded file
-            file_item = form['uploaded_file']
-            if file_item.filename:
+            if 'uploaded_file' in form and form['uploaded_file'].filename:
+                file_item = form['uploaded_file']
                 # Generate a unique filename
                 timestamp = str(int(time.time()))
                 filename = os.path.join(os.getcwd(), f'{timestamp}_{file_item.filename}')

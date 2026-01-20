@@ -73,3 +73,55 @@ Traceback (most recent call last):
 KeyError: 'uploaded_file'
 ----------------------------------------
 127.0.0.1 - - [20/Jan/2026 12:02:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Jan/2026 12:08:16] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Jan/2026 12:08:16] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Jan/2026 12:08:16] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Jan/2026 12:08:16] "POST /reset HTTP/1.1" 303 -
+127.0.0.1 - - [20/Jan/2026 12:08:16] "GET / HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 43004)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/socketserver.py", line 316, in _handle_request_noblock
+    self.process_request(request, client_address)
+  File "/usr/lib/python3.10/socketserver.py", line 347, in process_request
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.10/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python3.10/http/server.py", line 668, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.10/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/usr/lib/python3.10/http/server.py", line 433, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.10/http/server.py", line 421, in handle_one_request
+    method()
+  File "/home/ubuntu/gemini_code/gemini_server_v8.py", line 241, in do_POST
+    file_item = form['uploaded_file']
+  File "/usr/lib/python3.10/cgi.py", line 528, in __getitem__
+    raise KeyError(key)
+KeyError: 'uploaded_file'
+----------------------------------------
+127.0.0.1 - - [20/Jan/2026 12:12:49] "GET / HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 40574)
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/socketserver.py", line 316, in _handle_request_noblock
+    self.process_request(request, client_address)
+  File "/usr/lib/python3.10/socketserver.py", line 347, in process_request
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.10/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python3.10/http/server.py", line 668, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.10/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/usr/lib/python3.10/http/server.py", line 433, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.10/http/server.py", line 421, in handle_one_request
+    method()
+  File "/home/ubuntu/gemini_code/gemini_server_v8.py", line 241, in do_POST
+    if 'uploaded_file' in form and form['uploaded_file'].filename:
+  File "/usr/lib/python3.10/cgi.py", line 528, in __getitem__
+    raise KeyError(key)
+KeyError: 'uploaded_file'
+----------------------------------------

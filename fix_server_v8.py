@@ -1,0 +1,48 @@
+import os
+
+SERVER_FILE = "gemini_server_v8.py"
+
+with open(SERVER_FILE, "r") as f:
+    content = f.read()
+
+# 1. Fix HTML Form Encoding
+old_form = '<form method="POST" action="/">'
+new_form = '<form method="POST" action="/" enctype="multipart/form-data">'
+
+if old_form in content:
+    content = content.replace(old_form, new_form)
+    print(f"✅ patched HTML form enctype in {SERVER_FILE}")
+else:
+    print(f"⚠️  Could not find HTML form tag to patch (might be already patched).")
+
+# 2. Fix Unsafe Key Access in do_POST
+# We will replace the block to handle the missing key safely.
+old_block = """            # Handle the uploaded file
+            file_item = form['uploaded_file']
+            if file_item.filename:"""
+
+new_block = """            # Handle the uploaded file
+            if 'uploaded_file' in form and form['uploaded_file'].filename:
+                file_item = form['uploaded_file']"""
+
+# We also need to adjust the indentation of the subsequent lines if we were replacing a large block,
+# but to be safe and simple with string replacement, we will target the specific failure point.
+# A more robust approach for the python logic:
+
+if old_block in content:
+    content = content.replace(old_block, new_block)
+    print(f"✅ patched unsafe file_item access in {SERVER_FILE}")
+else:
+    # Try a fallback matching strictly the KeyError line
+    fallback_old = "file_item = form['uploaded_file']"
+    fallback_new = "file_item = form['uploaded_file'] if 'uploaded_file' in form else None"
+    
+    if fallback_old in content and old_block not in content:
+         # Check if we need to adjust the next line too
+         pass
+    else:
+        print(f"⚠️  Could not find the exact Python block to patch. Please inspect manually.")
+
+# Re-writing the file
+with open(SERVER_FILE, "w") as f:
+    f.write(content)
