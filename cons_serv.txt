@@ -1,0 +1,18 @@
+CRITICAL MISSION UPDATE: CONSOLIDATE & RESTORE PHOENIX
+
+We have a lineage fork. 
+- `gemini_server_v4.py` contains our "Core Agent Logic" (Bash/Edit/View tools) and the "Dual Phoenix" port takeover pattern.
+- `gemini_server_v6.py` contains our "Modern UI" (File uploads, model selector, CSS).
+
+Your Task: create `gemini_server_v7.py`.
+
+Requirements:
+1.  **Base Architecture:** Start with the `GeminiHandler` and HTML/CSS structure from `v6` (to keep the good UI).
+2.  **Restore Tools:** Re-integrate the `Bash`, `Edit`, `View`, `Glob`, `Grep` tool definitions from `v4` into the new v7 script.
+3.  **Restore Brain:** The `chat_session` in v7 must use these tools (like v4 does), not just `client.generate_content` (like v6 does).
+4.  **Restore Phoenix:** Copy the `attempt_port_bind` and "Port Takeover" logic (lines 179-199 of v4) into the `__main__` block of v7.
+    -   Ensure v7 accepts `--port` and `--force` arguments.
+    -   If the port is busy and force is True, kill the old PID and take the port.
+5.  **Restore Sudo Awareness:** In the `Bash` tool definition, add a comment or logic: "If command fails with permission error, suggest user check sudoers config; do not attempt interactive sudo."
+
+Output the complete, runnable `gemini_server_v7.py`.
