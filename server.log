@@ -368,3 +368,137 @@ ubuntu    240054       1  0 12:30 ?        00:00:02 python3 gemini_server_v8.py 
 127.0.0.1 - - [21/Jan/2026 04:06:54] "GET / HTTP/1.1" 200 -
 127.0.0.1 - - [21/Jan/2026 04:23:39] "POST / HTTP/1.1" 303 -
 127.0.0.1 - - [21/Jan/2026 04:23:40] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Jan/2026 07:57:37] "POST /reset HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 07:57:38] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Jan/2026 07:57:39] "GET / HTTP/1.1" 200 -
+
+📩 PROMPT: You are the Lead Systems Architect for this project. The current `~/gemini_code` repository has suffered from "version sprawl" (v1 through v8) and needs to be consolidated into a "Gold Master" release located at `~/gemini_code_sacrafice/gemini_code`.
+
+### Part 1: Architecture & Lineage Report
+Before migrating, generate a concise report explaining the **Crucial File Lineage** that ensures the server runs correctly. You must specifically detail:
+1.  **The Truth Synthesis:** How `unify_assets.py` acts as the bridge that merges heuristic findings (`smart_map.json`) with manual overrides (`variable_map.json`) to produce the authoritative `variable_map_final.json`.
+2.  **The Manufacturing Layer:** How `run_re_pipeline_v3.py` (The Deep Builder) and `pipeline_master.py` (The Quick Builder) utilize this map via `hydrate_personas_v2.py` to transform the raw `extracted_personas/` into the `hydrated_personas/` required by the runtime.
+3.  **The Runtime Dependency:** How `gemini_server_v8.py` mounts the `hydrated_personas/agent_engineer.md` to establish its identity and toolset.
+
+### Part 2: The "Sacrifice" Migration
+Write and execute a Python script (using your code execution tool) to perform a clean installation. The script must:
+1.  Create the destination directory: `~/gemini_code_sacrafice/gemini_code`.
+2.  **Selectively COPY** only the files necessary for a fully functional, rebuildable system. You must exclude all deprecated versions (v1-v7), logs (*.log), and temporary debug scripts.
+
+**Include ONLY the following files in the copy list:**
+* **Entry Points:** `gemini_server_v8.py` (The Server), `gemini_code.py` (The CLI).
+* **Orchestrators:** `pipeline_master.py` (Quick Run), `run_re_pipeline_v3.py` (Full Rebuild).
+* **Asset & Map Logic (CRITICAL):** `unify_assets.py`, `hydrate_personas_v2.py`, `hydrate_personas.py`.
+* **Tooling & Audit:** `patch_tools.py`, `reconstruct_core_tools.py`, `audit_agent_logic.py`, `audit_tools.py` (if present), `heal_tools.py`.
+* **Data & Config:** `variable_map_final.json`, `smart_map.json`, `variable_map.json`, `core_tools_reconstructed.json`, `package.json`, `requirements.txt`.
+* **Directories:** Recursively copy `extracted_personas/` and `hydrated_personas/`.
+
+**Output:** Print the manifest of the new "Gold Master" directory after the copy is complete to verify the lineage is intact.
+
+[SERVER] ⚡ Executing Bash: mkdir -p ~/gemini_code_sacrafice/gemini_code
+[SERVER] 📤 Output: 
+
+[SERVER] ✏️ Editing file: migration_script.py
+
+[SERVER] ⚡ Executing Bash: python migration_script.py
+[SERVER] 📤 Output: Copied file: gemini_server_v8.py
+Copied file: gemini_code.py
+Copied file: pipeline_master.py
+Copied file: run_re_pipeline_v3.py
+Copied file: unify_assets.py
+Copied file: hydrate_personas_v2.py
+Copied ...
+
+[SERVER] Model Choice: gemini-2.0-flash
+
+[SERVER] No file was uploaded
+
+📩 PROMPT: You are the Chief Systems Architect. We are performing a "Gold Master" extraction of the `gemini_code` repository to `~/gemini_code_sacrafice/gemini_code`. The previous migration attempt failed because it missed the critical "sanitization" and "browser" layers of the asset pipeline.
+
+### Part 1: The Dependency & Lineage Report
+Analyze the `unify_assets.py` script and the codebase to generate a report on the **True Build Lineage**. You must explicitly explain:
+1.  **The Four-Stage Variable Synthesis:** How `unify_assets.py` doesn't just use one map, but merges FOUR distinct layers to create `master_variable_map.json`:
+    * Base: `variable_map.json`
+    * Heuristic: `smart_map.json`
+    * Final Manual: `variable_map_final.json`
+    * **The Missing Link:** `variable_map_sanitized.json` (Explain why ignoring this breaks the lineage).
+2.  **The Tool Definition Merge:** How `master_tool_definitions.json` is composited from `core_tools_reconstructed.json` AND **`gemini_browser_tools.json`** (which contains the critical web-interaction schemas often missed).
+3.  **The Dual-Runtime Divergence:** Note the architectural split where:
+    * `gemini_server_v8.py` relies on the *Build Artifacts* in `hydrated_personas/`.
+    * `gemini_code.py` (CLI) relies on the *Source Truth* in `extracted_personas/`.
+
+### Part 2: The Surgical Migration (Python Script)
+Write and execute a Python script to perform the migration. Do NOT use `cp -r`. You must write a script that explicitly iterates and copies **only** the necessary files to `~/gemini_code_sacrafice/gemini_code`.
+
+**The script must:**
+1.  Ensure the destination directory exists (wipe it if it exists to ensure a clean state).
+2.  Copy the following **Corrected Allowlist**:
+    * **Core Runtimes:** `gemini_server_v8.py`, `gemini_code.py`.
+    * **Pipeline Logic:** `pipeline_master.py`, `unify_assets.py`, `hydrate_personas.py`, `hydrate_personas_v2.py`, `run_re_pipeline_v3.py`.
+    * **Asset Inputs (The Critical Missing Files):** * `variable_map.json`, `smart_map.json`, `variable_map_final.json`
+        * **`variable_map_sanitized.json`** (CRITICAL)
+        * `core_tools_reconstructed.json`
+        * **`gemini_browser_tools.json`** (CRITICAL)
+    * **Audit & Repair:** `patch_tools.py`, `reconstruct_core_tools.py`, `audit_agent_logic.py`, `heal_tools.py`.
+    * **Build Artifacts (Cache):** `master_variable_map.json`, `master_tool_definitions.json`.
+    * **Environment:** `package.json`, `package-lock.json`.
+    * **Directories:** Recursively copy `extracted_personas/` and `hydrated_personas/`.
+
+3.  After copying, list the contents of the `gemini_code_sacrafice/gemini_code` directory to verify the presence of `variable_map_sanitized.json` and `gemini_browser_tools.json`.
+
+Execute this script immediately.
+
+[SERVER] 👁️ Viewing file: unify_assets.py
+
+[SERVER] ⚡ Executing Bash: rm -rf ~/gemini_code_sacrafice/gemini_code
+[SERVER] 📤 Output: 
+
+[SERVER] ⚡ Executing Bash: mkdir -p ~/gemini_code_sacrafice/gemini_code
+[SERVER] 📤 Output: 
+
+[SERVER] ✏️ Editing file: migrate.py
+
+[SERVER] ⚡ Executing Bash: python migrate.py
+[SERVER] 📤 Output: Copied gemini_server_v8.py to /home/ubuntu/gemini_code_sacrafice/gemini_code
+Copied gemini_code.py to /home/ubuntu/gemini_code_sacrafice/gemini_code
+Copied pipeline_master.py to /home/ubuntu/gemini_co...
+
+[SERVER] ⚡ Executing Bash: ls ~/gemini_code_sacrafice/gemini_code
+[SERVER] 📤 Output: audit_agent_logic.py
+core_tools_reconstructed.json
+extracted_personas
+gemini_browser_tools.json
+gemini_code.py
+gemini_server_v8.py
+heal_tools.py
+hydrate_personas.py
+hydrate_personas_v2.py
+hydrated_per...
+
+[SERVER] Model Choice: gemini-2.0-flash
+
+[SERVER] No file was uploaded
+
+📩 PROMPT: @Agent_Architect You are tasked with a critical integrity verification. 
+
+**Target**: The current raw repository located at `/home/ubuntu/gemini_code_sacrafice/gemini_code`.
+**Reference**: The "clean experimental repo" (Please first use `ls -F /home/ubuntu/` to identify the correct directory name for the clean reference, likely `gemini_code_clean` or similar).
+
+**Mission: Verify State & Integrity**
+Execute the following verification protocol using your Bash tool:
+
+1.  **Target Acquisition**: Confirm the existence of the raw repo and locate the clean reference repo.
+2.  **Structural Audit**: Verify that the raw repo contains exactly 101 files as expected. specifically check for the presence of `gemini_server_v8.py` and the `hydrated_personas/` directory.
+3.  **Deep Diff**: Run a recursive diff between the Raw and Clean repos to identify pollution or drift.
+    * Command: `diff -r --brief --exclude=".git" --exclude="__pycache__" /home/ubuntu/gemini_code_sacrafice/gemini_code [PATH_TO_CLEAN_REPO]`
+4.  **Persona Hydration Check**: The raw repo lists `hydrated_personas` containing `agent_architect_full.md` and `agent_verifier.md`. Randomly sample 3 files in this directory using `cat` or `grep` to ensure they contain valid markdown content and are not empty 0-byte files.
+5.  **Report**: Summarize the state of the raw repo. Is it identical to the clean experimental repo? If not, list the modified or added files.
+
+[SERVER] ⚡ Executing Bash: ls -F /home/ubuntu/
+127.0.0.1 - - [21/Jan/2026 07:57:52] "POST / HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 07:57:53] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Jan/2026 08:03:37] "POST /reset HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 08:03:39] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Jan/2026 08:03:40] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Jan/2026 08:04:54] "POST / HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 08:04:56] "GET / HTTP/1.1" 200 -
