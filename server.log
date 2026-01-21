@@ -656,3 +656,17 @@ Launch the server again with `python3 -u` to prevent log buffering.
 [SERVER] ⚡ Executing Bash: python3 -u /home/ubuntu/gemini_code_sacrafice/gemini_code/gemini_server_v8.py --port 9091 --name "Test_Subject_V8_Fixed" > server_test_fixed.log 2>&1 & sleep 10 && curl -X POST http://localhost:9091/ -F "prompt=Status Report" -F "model_choice=gemini-2.0-flash" && grep "RESPONSE" server_test_fixed.log && kill $(lsof -t -i:9091)
 127.0.0.1 - - [21/Jan/2026 08:19:11] "POST / HTTP/1.1" 303 -
 127.0.0.1 - - [21/Jan/2026 08:19:11] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Jan/2026 08:52:39] "POST /reset HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 08:52:40] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Jan/2026 08:52:41] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Jan/2026 08:52:42] "POST /reset HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 08:54:15] "POST / HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 08:54:17] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Jan/2026 08:54:55] "POST / HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 08:54:57] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Jan/2026 08:55:09] "POST / HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 08:55:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Jan/2026 08:55:17] "POST / HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 08:55:19] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Jan/2026 08:55:31] "POST / HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 08:55:32] "GET / HTTP/1.1" 200 -
