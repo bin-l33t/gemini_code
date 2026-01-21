@@ -1,0 +1,8 @@
+Investigate why the 'SpawnSubAgent' tool is failing to execute missions. 
+
+1. Read 'gemini_swarm/tools.py' and look at the 'SpawnSubAgent' function. 
+2. Identify the script path being used in the subprocess call (it likely uses '__file__'). 
+3. Check if 'gemini_swarm/agent_runner.py' is the intended entry point for sub-agents. 
+4. Modify 'gemini_swarm/tools.py' to update the 'SpawnSubAgent' function so that it calls 'gemini_swarm/agent_runner.py' instead of itself. Ensure the path is correct relative to the execution root (likely 'gemini_swarm/agent_runner.py').
+5. Verify the fix by spawning a blocking sub-agent with the mission: "Run the command 'echo SUB_AGENT_SUCCESS' and report the result."
+6. Confirm that the sub-agent's output is correctly captured and reported back to you.

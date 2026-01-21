@@ -1,0 +1,12 @@
+MISSION: Fix the 'SpawnSubAgent' tool and verify it can successfully launch sub-agents.
+
+1.  **Diagnostics**: Read 'gemini_swarm/tools.py' and 'gemini_swarm/agent_runner.py'. Confirm that 'tools.py' lacks 'import sys' and uses '__file__' in the 'SpawnSubAgent' function.
+2.  **Apply Fixes**: 
+    - Modify 'gemini_swarm/tools.py' to include 'import sys' at the top.
+    - Update the 'SpawnSubAgent' function to use 'gemini_swarm/agent_runner.py' instead of '__file__' in the subprocess calls.
+3.  **Environment Check**: Use 'ls -l gemini_swarm/agent_runner.py' to ensure the runner exists and is accessible.
+4.  **Verification Test**: Use the 'Bash' tool to trigger a blocking sub-agent with the mission: "Run 'echo SUB_AGENT_V8_LIVE' and report the result."
+5.  **Validation**: Verify that your STDOUT captures the sub-agent's output ('SUB_AGENT_V8_LIVE'). 
+6.  **Fallback**: If the test fails, check the STDERR. If the failure is due to pathing, try setting 'export PYTHONPATH=$PYTHONPATH:.' before the execution or using an absolute path for the agent_runner.
+
+Report the final status of the tool and the output of the verification test.
