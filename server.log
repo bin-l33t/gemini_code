@@ -502,3 +502,157 @@ Execute the following verification protocol using your Bash tool:
 127.0.0.1 - - [21/Jan/2026 08:03:40] "GET / HTTP/1.1" 200 -
 127.0.0.1 - - [21/Jan/2026 08:04:54] "POST / HTTP/1.1" 303 -
 127.0.0.1 - - [21/Jan/2026 08:04:56] "GET / HTTP/1.1" 200 -
+[SERVER] 📤 Output: @
+GEMINI.md
+Makefile
+Makefile.test
+Makefile_old
+__pycache__/
+agent_new/
+agent_trace.log
+agreement_score.txt
+analyze_plot.py
+analyze_results.py
+auto_test_agent.py
+blindness_curve.png
+blindness_results....
+
+[SERVER] ⚡ Executing Bash: find /home/ubuntu/gemini_code_sacrafice/gemini_code -type f | wc -l
+[SERVER] 📤 Output: 101
+
+[SERVER] ⚡ Executing Bash: find /home/ubuntu/gemini_code_sacrafice/gemini_code -name 'gemini_server_v8.py'
+[SERVER] 📤 Output: /home/ubuntu/gemini_code_sacrafice/gemini_code/gemini_server_v8.py
+
+[SERVER] ⚡ Executing Bash: find /home/ubuntu/gemini_code_sacrafice/gemini_code -type d -name 'hydrated_personas'
+[SERVER] 📤 Output: /home/ubuntu/gemini_code_sacrafice/gemini_code/hydrated_personas
+
+[SERVER] ⚡ Executing Bash: diff -r --brief --exclude=".git" --exclude="__pycache__" /home/ubuntu/gemini_code_sacrafice/gemini_code /home/ubuntu/gemini_code_test
+[SERVER] 📤 Output: Only in /home/ubuntu/gemini_code_sacrafice/gemini_code: audit_agent_logic.py
+Only in /home/ubuntu/gemini_code_sacrafice/gemini_code: core_tools_reconstructed.json
+Only in /home/ubuntu/gemini_code_sacr...
+
+[SERVER] ⚡ Executing Bash: ls /home/ubuntu/gemini_code_sacrafice/gemini_code/hydrated_personas
+[SERVER] 📤 Output: agent_architect.md
+agent_architect_full.md
+agent_browser_automation.md
+agent_browser_automation_assistant.md
+agent_browser_operator.md
+agent_claude_code.md
+agent_claude_code_cli.md
+agent_claude_guide....
+
+[SERVER] ⚡ Executing Bash: head -n 5 /home/ubuntu/gemini_code_sacrafice/gemini_code/hydrated_personas/agent_architect_full.md
+[SERVER] 📤 Output: ```markdown
+**Persona Name:** Claude Guide Agent
+
+You are the Claude guide agent. Your primary responsibility is helping users understand and use Claude Code, the Claude Agent SDK, and the Claude API ...
+
+[SERVER] ⚡ Executing Bash: head -n 5 /home/ubuntu/gemini_code_sacrafice/gemini_code/hydrated_personas/agent_verifier.md
+[SERVER] 📤 Output: **Persona Name:** Verifier
+
+**Clean Text:**
+
+```markdown
+
+[SERVER] ⚡ Executing Bash: head -n 5 /home/ubuntu/gemini_code_sacrafice/gemini_code/hydrated_personas/agent_engineer.md
+[SERVER] 📤 Output: This is a **System Prompt**.
+
+**1. Persona Name:** Software Engineering Assistant
+
+**2. Clean Text:**
+
+[SERVER] Model Choice: gemini-2.0-flash
+
+[SERVER] No file was uploaded
+
+📩 PROMPT: @Agent_Engineer The previous audit was static. We need ACTIVE functional verification of the new server code found in the raw repo.
+
+**Mission**: Launch, Test, and Teardown the candidate server.
+
+**Target File**: `/home/ubuntu/gemini_code_sacrafice/gemini_code/gemini_server_v8.py`
+
+**Protocol**:
+1.  **Check Environment**: Verify `GEMINI_API_KEY` is set (do not print it).
+2.  **Launch Candidate**: Start the target server in the background on a distinct port to avoid conflicts.
+    * Command: `python3 /home/ubuntu/gemini_code_sacrafice/gemini_code/gemini_server_v8.py --port 8080 --name "Test_Subject_V8" > server_test.log 2>&1 &`
+3.  **Wait & Verify**: Sleep for 5 seconds to allow startup. Check if the process is running using `ps aux | grep gemini_server_v8`.
+4.  **Live Inference Test**: Send a real POST request to the candidate server to prove it can handle prompts.
+    * Command: `curl -X POST http://localhost:8080/ -F "prompt=Hello World, report your status." -F "model_choice=gemini-2.0-flash"`
+5.  **Output Analysis**: Display the output of the curl command. Does it contain the agent's response?
+6.  **Teardown**: Kill the test process using the PID found in step 3.
+7.  **Logs**: Cat the first 20 lines of `server_test.log` to check for startup errors.
+
+[SERVER] ⚡ Executing Bash: if [ -z "$GEMINI_API_KEY" ]; then echo "GEMINI_API_KEY is not set"; else echo "GEMINI_API_KEY is set"; fi
+[SERVER] 📤 Output: GEMINI_API_KEY is set
+
+[SERVER] ⚡ Executing Bash: python3 /home/ubuntu/gemini_code_sacrafice/gemini_code/gemini_server_v8.py --port 8080 --name "Test_Subject_V8" > server_test.log 2>&1 &
+[SERVER] 📤 Output: 
+
+[SERVER] ⚡ Executing Bash: sleep 5 && ps aux | grep gemini_server_v8
+[SERVER] 📤 Output: ubuntu    240054  0.0  0.0 246044 85660 ?        Sl   Jan20   0:08 python3 gemini_server_v8.py --port 8888
+ubuntu    250466 13.8  0.0  98572 80260 ?        S    08:04   0:00 python3 /home/ubuntu/gemin...
+
+[SERVER] ⚡ Executing Bash: curl -X POST http://localhost:8080/ -F "prompt=Hello World, report your status." -F "model_choice=gemini-2.0-flash"
+[SERVER] 📤 Output: % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0   ...
+
+[SERVER] ⚡ Executing Bash: head -n 20 server_test.log
+[SERVER] 📤 Output: 127.0.0.1 - - [21/Jan/2026 08:04:16] "POST / HTTP/1.1" 303 -
+
+[SERVER] ⚡ Executing Bash: curl -L -X POST http://localhost:8080/ -F "prompt=Hello World, report your status." -F "model_choice=gemini-2.0-flash"
+
+[SERVER] ⚡ Executing Bash: head -n 20 server_test.log
+[SERVER] 📤 Output: 127.0.0.1 - - [21/Jan/2026 08:04:16] "POST / HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 08:04:19] "POST / HTTP/1.1" 303 -
+
+[SERVER] ⚡ Executing Bash: curl http://localhost:8080/
+[SERVER] 📤 Output: <!DOCTYPE html>
+<html>
+<head>
+    <title>Gemini Code Console</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/marked/marked.min.css">
+    <style>
+        body { font-family: 'Seg...
+
+[SERVER] ⚡ Executing Bash: ps aux | grep gemini_server_v8
+[SERVER] 📤 Output: ubuntu    240054  0.0  0.0 246044 85660 ?        Sl   Jan20   0:08 python3 gemini_server_v8.py --port 8888
+ubuntu    250466  1.9  0.0 246036 80980 ?        Sl   08:04   0:00 python3 /home/ubuntu/gemin...
+
+[SERVER] ⚡ Executing Bash: kill 250466
+[SERVER] 📤 Output: 
+
+[SERVER] Model Choice: gemini-2.0-flash
+
+[SERVER] No file was uploaded
+
+📩 PROMPT: @Agent_Engineer The server is functioning correctly (returning HTTP 303 for browsers), but our test setup cannot see the response because it is hidden in the HTML history and not logged to stdout.
+
+**Mission**: Enable visibility and re-verify.
+
+**Action 1: Patch Logging**
+Edit `/home/ubuntu/gemini_code_sacrafice/gemini_code/gemini_server_v8.py`.
+Locate the `do_POST` method. Find the line: `history_log.append(("GEMINI", output_text))`
+Insert this line immediately before it:
+`print(f"\n[SERVER] &#129302; RESPONSE: {output_text}", flush=True)`
+
+**Action 2: Re-Test with Unbuffered Output**
+Launch the server again with `python3 -u` to prevent log buffering.
+1. Command: `python3 -u /home/ubuntu/gemini_code_sacrafice/gemini_code/gemini_server_v8.py --port 9091 --name "Test_Subject_V8_Fixed" > server_test_fixed.log 2>&1 &`
+2. Sleep 5.
+3. Curl: `curl -X POST http://localhost:9091/ -F "prompt=Status Report" -F "model_choice=gemini-2.0-flash"`
+4. Verify: `grep "RESPONSE" server_test_fixed.log`
+5. Cleanup: Kill the process on port 9091.
+
+[SERVER] ✏️ Editing file: /home/ubuntu/gemini_code_sacrafice/gemini_code/gemini_server_v8.py
+
+[SERVER] ⚡ Executing Bash: python3 -u /home/ubuntu/gemini_code_sacrafice/gemini_code/gemini_server_v8.py --port 9091 --name "Test_Subject_V8_Fixed" > server_test_fixed.log 2>&1 & sleep 5 && curl -X POST http://localhost:9091/ -F "prompt=Status Report" -F "model_choice=gemini-2.0-flash" && grep "RESPONSE" server_test_fixed.log && kill $(lsof -t -i:9091)
+[SERVER] 📤 Output: % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0   ...
+
+[SERVER] ⚡ Executing Bash: python3 -u /home/ubuntu/gemini_code_sacrafice/gemini_code/gemini_server_v8.py --port 9091 --name "Test_Subject_V8_Fixed" > server_test_fixed.log 2>&1 & sleep 10 && curl -X POST http://localhost:9091/ -F "prompt=Status Report" -F "model_choice=gemini-2.0-flash" && grep "RESPONSE" server_test_fixed.log && kill $(lsof -t -i:9091)
+127.0.0.1 - - [21/Jan/2026 08:19:11] "POST / HTTP/1.1" 303 -
+127.0.0.1 - - [21/Jan/2026 08:19:11] "GET / HTTP/1.1" 200 -
