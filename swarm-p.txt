@@ -1,0 +1,134 @@
+To set up the swarm architecture in a new, isolated environment with a dedicated test suite, you can follow this structure. This implementation integrates the supervisor feedback loop and uses the core logic from your provided scripts.
+
+1. Swarm Workspace Structure
+Create a new directory named swarm_workspace/ and organize it as follows:
+
+Plaintext
+
+swarm_workspace/
+├── gemini_swarm/          # Core swarm logic
+│   ├── core.py
+│   ├── orchestrator.py
+│   ├── agent_runner.py
+│   └── tools.py
+├── personas/              # System instructions
+│   └── agent_engineer.md
+├── tests/                 # Test suite directory
+│   └── test_swarm_core.py
+└── swarm_monitor.py       # Supervisor feedback loop logic
+2. Supervisor Implementation (swarm_monitor.py)
+This script implements the feedback loop discussed in your proposal. It uses the run_mission function from core.py and applies a separate reviewer pass to determine if the mission goals were achieved.
+
+Python
+
+import time
+from gemini_swarm import core, tools
+
+# Define the Quality Assurance persona for the feedback loop
+REVIEWER_PERSONA = (
+    "You are a Quality Assurance lead. Compare the User's Mission with the Agent's Report. "
+    "Respond ONLY with 'SUCCESS' if the goal is met, or a detailed list of 'REMAINING_TASKS' if not."
+)
+
+def run_supervised_mission(mission_text, retries=3):
+    """
+    Executes a mission with an automated feedback loop.
+    If the mission fails, the reviewer's feedback is passed to the next attempt.
+    """
+    current_mission = mission_text
+    # Toolset includes diagnostics from the swarm definitions
+    swarm_tools = [tools.Bash, tools.Edit, tools.InspectPort, tools.KillProcess]
+    
+    for attempt in range(retries):
+        print(f"\n--- [SUPERVISOR] ATTEMPT {attempt + 1} OF {retries} ---")
+        
+        # Step 1: Execute the mission using the Swarm Core
+        agent_report = core.run_mission(
+            prompt_input=current_mission,
+            persona_path="personas/agent_engineer.md",
+            tools=swarm_tools
+        )
+
+        # Step 2: Perform a Reviewer call to verify completion
+        print("🔍 [SUPERVISOR] Reviewing agent performance...")
+        review = core.client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=f"MISSION: {mission_text}\n\nREPORT: {agent_report}\n\n{REVIEWER_PERSONA}"
+        )
+
+        if "SUCCESS" in review.text.upper():
+            print("✅ [SUPERVISOR] Mission Accomplished.")
+            return True
+        else:
+            print(f"⚠️ [SUPERVISOR] Goal not achieved. Feedback:\n{review.text}")
+            # Update the mission with the reviewer's critique for the next respawn
+            current_mission = (
+                f"Original Mission: {mission_text}\n\n"
+                f"Previous Attempt Failed. Feedback: {review.text}. Try again."
+            )
+            time.sleep(2) # Brief cooldown between attempts
+
+    print("❌ [SUPERVISOR] Mission failed after maximum retries.")
+    return False
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        run_supervised_mission(sys.argv[1])
+    else:
+        print("Usage: python3 swarm_monitor.py '<mission_text>'")
+3. Swarm Test Suite (tests/test_swarm_core.py)
+This test suite verifies the core components of the swarm, including tool execution and the agent's ability to communicate with the API.
+
+Python
+
+import unittest
+import os
+from gemini_swarm import tools, core
+
+class TestSwarmCore(unittest.TestCase):
+    
+    def test_bash_tool_execution(self):
+        """Verify the Bash tool can execute simple commands."""
+        result = tools.Bash("echo 'hello world'")
+        self.assertIn("hello world", result)
+        self.assertIn("EXIT_CODE: 0", result)
+
+    def test_edit_tool(self):
+        """Verify the Edit tool can write files."""
+        test_file = "test_output.txt"
+        test_content = "swarm test content"
+        tools.Edit(test_file, test_content)
+        
+        with open(test_file, "r") as f:
+            content = f.read()
+        self.assertEqual(content, test_content)
+        os.remove(test_file)
+
+    def test_inspect_port_free(self):
+        """Verify InspectPort reports free for an unused high port."""
+        result = tools.InspectPort(12345)
+        self.assertIn("PORT_STATUS: FREE", result)
+
+    def test_core_initialization(self):
+        """Verify core.run_mission handles missing personas gracefully."""
+        # Test with a non-existent persona path to trigger fallback logic
+        try:
+            core.run_mission("hello", persona_path="non_existent.md")
+        except Exception as e:
+            self.fail(f"core.run_mission raised {type(e).__name__} unexpectedly!")
+
+if __name__ == "__main__":
+    unittest.main()
+Next Steps for Implementation
+Environment Check: Ensure your GEMINI_API_KEY is exported in the current terminal session.
+
+Initialize Directory:
+
+Move your existing gemini_swarm/*.py files into the new gemini_swarm/ folder.
+
+Place agent_engineer.md in the personas/ folder.
+
+Run Tests: Execute python3 -m unittest tests/test_swarm_core.py to verify the environment is ready.
+
+Execute Mission: Run python3 swarm_monitor.py "Fix the server functionality in gemini_server_v9.py" to start the supervised task.

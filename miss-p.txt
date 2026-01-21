@@ -1,0 +1,27 @@
+1. Analyze the Codebase
+
+Read gemini_server_v9.py and identify why the file upload capability is missing. Notice that the HTML_TEMPLATE lacks a file input element and the do_POST method does not contain logic to save incoming file streams.
+
+Investigate the 404 Not Found error triggered by commands like ls -la. This error typically occurs when the Gemini API cannot find the requested resource. Check if the model ID gemini-2.0-flash requires the models/ prefix (e.g., models/gemini-2.0-flash) or if there is a misconfiguration in the automatic_function_calling settings.
+
+2. Implement Fixes
+
+Fix File Uploads:
+
+Update the HTML_TEMPLATE form to include <input type="file" name="uploaded_file">.
+
+Modify the do_POST handler to extract the file using cgi.FieldStorage. Save the file to the local directory and add a "TOOL" entry to history_log confirming the upload.
+
+Fix Tool 404 Error:
+
+Adjust the model initialization logic. Ensure the model ID and tool registration in client.chats.create are compatible with the current SDK requirements.
+
+Ensure the Bash tool is correctly invoked and its output is returned to the chat session.
+
+3. Verification & Subagent Launch
+
+After applying the fixes, use the Bash tool to start the server in the background on port 8080.
+
+Launch a subagent by executing the following command: python3 auto_test_agent_v8.py "Test the running server at localhost:8080. Verify that sending 'ls -la' triggers the Bash tool successfully and that a dummy file can be uploaded via a POST request."
+
+Confirm the subagent reports success before concluding the mission.

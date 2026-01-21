@@ -1,0 +1,12 @@
+MISSION: Investigate and fix two critical issues in 'gemini_server_v9.py'.
+
+ISSUE 1: File upload functionality is broken. While the HTML template contains an upload form, the 'do_POST' method in the 'GeminiHandler' class does not contain any logic to process 'multipart/form-data' file uploads or save them to disk.
+
+ISSUE 2: Executing commands like 'ls -la' results in a "404 Not Found" error from the Gemini API. This suggests the model IDs in the HTML dropdown (gemini-2.0-flash, gemini-2.0-pro) might be incorrect for the current SDK version or unavailable to the API key.
+
+TASKS:
+1. Read 'gemini_server_v9.py' and verify the 'do_POST' implementation.
+2. Modify 'do_POST' to handle file uploads. It should check 'cgi.FieldStorage' for file items and save them to the current working directory (or a dedicated 'uploads/' folder).
+3. Investigate the '404' error. Use a small test script with the 'google.genai' client to list available models (client.models.list()) to find the exact model ID strings required (e.g., checking if 'models/gemini-2.0-flash' or 'gemini-2.0-flash-001' is expected).
+4. Update the HTML_TEMPLATE and 'do_POST' logic to use confirmed valid model IDs.
+5. Restart the server on port 8080 and verify that both file uploads and tool-calling (e.g., 'ls -la') work correctly.
