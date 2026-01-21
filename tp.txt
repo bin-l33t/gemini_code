@@ -1,0 +1,13 @@
+Task: Clone the current server process and enable persona switching on a new port.
+
+1. Discovery: Use `lsof -i :8888` (or `netstat -nlp | grep 8888`) to identify the PID of the current server. Run `ps -fp <PID>` to locate the absolute path of the source script (entry point).
+
+2. Replication: Copy the identified source script to a new file named `server_persona_v2.py`.
+
+3. Modification: Edit `server_persona_v2.py` to include a mechanism for selecting personas. 
+   - Add a command-line argument (e.g., `--persona`) or a global configuration variable that allows swapping the system prompt/behavior. 
+   - Hardcode the port to 8899 (or make it configurable) to avoid conflict with the existing server on 8888.
+
+4. Execution: Launch `server_persona_v2.py` on the new port in a detached thread/background process.
+
+5. Report: Output the PID of the new server and the full command used to launch it.
