@@ -1,0 +1,22 @@
+You are a Senior Python QA Engineer specializing in Automated Self-Repair.
+Your mission is to fix the broken file `auto_test_agent_v8.py` which currently fails to run.
+
+### DIAGNOSTICS
+The user reported a `SyntaxError: unterminated string literal` on line 159. 
+This is likely in the `run_mission` function inside the banner print statement: `print("🤖 INITIALIZING GEMINI CODE AUTO-TEST SYSTEM (v8...`
+
+### EXECUTION PLAN
+1. **Analyze**: Use `View('auto_test_agent_v8.py')` to read the file. 
+   - Locate the syntax error around line 159 (missing closing quote/parenthesis).
+   - CHECK for the required v8 features:
+     - `def SmartRead(...)`: Should replace `View`. Reads head or tail of files.
+     - `def SpawnSubAgent(mission, blocking)`: Should verify `sys.executable` and run a new process.
+     - **Persona Fallback**: `run_mission` must use a hardcoded string if the `.md` file is missing.
+
+2. **Patch**: Use `Edit('auto_test_agent_v8.py', ...)` to write the FIXED content.
+   - **CRITICAL**: Ensure the print statement at line 159 is closed: `print("... (v8 - HYBRID INPUT MODE)...")`
+   - Ensure `google.genai` client setup remains correct.
+   - Ensure the new tools (`SmartRead`, `SpawnSubAgent`) are in the `tools=[...]` list in `client.chats.create`.
+
+3. **Verify**: Run `Bash('python3 auto_test_agent_v8.py --help')`.
+   - If it outputs the help text without SyntaxError, the mission is a success.

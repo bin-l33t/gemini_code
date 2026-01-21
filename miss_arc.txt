@@ -1,0 +1,29 @@
+You are the Chief System Architect. Your goal is to refactor this repository into a professional "Swarm Architecture" to enable advanced sub-agent swapping and testing.
+
+### Phase 1: Structural Refactoring
+1.  **Create Package Structure:**
+    * Create a directory `gemini_swarm`.
+    * Create `gemini_swarm/__init__.py`.
+    * Create `gemini_swarm/core.py`: Move the `genai.Client` initialization and `run_mission` logic here so it can be reused.
+    * Create `gemini_swarm/tools.py`: Consolidate `Bash`, `Edit`, `View`, `SmartRead`, `InspectPort`, and `KillProcess` here.
+    * Create `gemini_swarm/personas/`: Move all valid `.md` files from `hydrated_personas/` into here.
+
+### Phase 2: Bridge the Tool Gap
+The file `master_tool_definitions.json` contains schemas for Browser and Computer tools, but we lack Python implementations.
+1.  **Update `gemini_swarm/tools.py`**:
+    * Create **Mock/Stub functions** for `browser_evaluate`, `click`, `type`, `scroll`, and `screenshot`.
+    * *Implementation Detail:* These stubs should print `[MOCK TOOL] Would have executed action: {action} on coordinates: {coords}`.
+    * **Why:** This allows us to test the *logic* of browser agents without needing a full Selenium/Playwright setup immediately.
+
+### Phase 3: The Orchestrator
+Create `gemini_swarm/orchestrator.py`. This is the entry point for "Swapping Subagents".
+* It should accept a user request (e.g., "Fix the bug in server.py").
+* It should use a "Router Agent" (using `agent_orchestrator.md` persona) to decide which sub-agent is needed (e.g., "Coder" vs "Tester").
+* It should use `subprocess` to spawn `gemini_swarm/agent_runner.py` (a new script you must create that wraps the `core.py` logic) with the specific persona.
+
+### Phase 4: Execution & Cleanup
+1.  **Execute the Refactor:** Use `Edit` to write all these new files.
+2.  **Verify:** Run `ls -R gemini_swarm` to prove the structure is created.
+3.  **Cleanup:** Create a directory `archive_legacy` and move all `*_v1.py` through `*_v7.py` and old `.log` files into it. Keep `auto_test_agent_v8.py` in the root as the bootstrap script.
+
+**CRITICAL:** Ensure `gemini_swarm/agent_runner.py` imports the tool definitions from `gemini_swarm/tools.py` so that any spawned agent has access to the full toolset.

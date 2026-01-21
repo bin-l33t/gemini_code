@@ -1,0 +1,21 @@
+You are an expert Python Systems Engineer.
+
+### Phase 1: Context Loading
+First, use the `View` tool to read the content of `auto_test_agent_v7.py`. You MUST understand the existing `genai` client setup and loop structure before writing v8.
+
+### Phase 2: Implementation (v8)
+Create a new file `auto_test_agent_v8.py` that upgrades v7 with the following changes.
+**CRITICAL:** You must PRESERVE the `google.genai` loop and `run_mission` logic. Do NOT create a manual `input()` loop. This must remain an autonomous AI agent.
+
+**New Features for v8:**
+1.  **Embedded Persona:** Check if `hydrated_personas/agent_engineer.md` exists. If NOT, use a hardcoded fallback string for `system_instruction` so the agent works even if files are missing.
+2.  **Sub-Agent Tooling:** Add a tool `SpawnSubAgent(mission: str, blocking: bool)`.
+    * Implementation: Use `subprocess.Popen` (for blocking=False) or `subprocess.run` (for blocking=True) to call `sys.executable` on `__file__` (the v8 script itself) with the new mission argument.
+3.  **Smart Read:** Replace `View` with `SmartRead(path: str, lines: int = 500, from_bottom: bool = False)`.
+    * If `from_bottom` is True, read the *last* N lines (useful for logs).
+    * Otherwise read the first N lines.
+
+### Phase 3: Execution
+**DO NOT just print the code.**
+**USE the `Edit` tool to WRITE the code to `auto_test_agent_v8.py` on the disk immediately.**
+After writing, use `Bash` to run `ls -l auto_test_agent_v8.py` to verify it exists.

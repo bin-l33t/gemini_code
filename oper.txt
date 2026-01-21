@@ -1,0 +1,37 @@
+Create `gemini_operator_v8.py`. This is a critical evolution of `auto_test_agent_v7.py`.
+
+The goal is to transform the script from a "one-shot test runner" into a "Interactive CLI Rescue Agent" that can be used via SSH when the web server is down.
+
+### Requirements:
+
+1.  **Interactive REPL Loop:**
+    * If the script is run *without* arguments (e.g., `python3 gemini_operator_v8.py`), it must enter a `while True:` loop where the user can type messages and get responses continuously.
+    * Maintain chat history in the session so the agent remembers previous turns.
+    * Include a command like `exit` or `quit` to break the loop.
+
+2.  **Tool Parity with Server v8:**
+    * Keep existing tools: `Bash`, `InspectPort`, `KillProcess`, `Edit`, `View`.
+    * **ADD** the missing search tools from Server v8:
+        * `Glob(pattern: str)`: To list files.
+        * `Grep(pattern: str, path: str)`: To search file contents.
+
+3.  **Smart Defaults (No Dangerous Auto-Run):**
+    * Remove the hardcoded "Kill port 8080" default mission.
+    * If no prompt is provided, the system instruction should simply be: "Ready. You are the CLI Operator. Waiting for user input."
+
+4.  **Robust Persona Loading:**
+    * Try to load `hydrated_personas/agent_engineer.md`.
+    * If that fails, try `extracted_personas/agent_engineer.md`.
+    * If that fails, fall back to a hardcoded string: "You are an expert CLI Engineer."
+    * Print clearly which persona was loaded at startup.
+
+5.  **Argument Handling:**
+    * Support `--once "My Prompt"`: Run a single mission and exit (backward compatibility for automation).
+    * Support `--model`: Default to `gemini-2.0-flash`.
+
+6.  **Code Structure:**
+    * Use the `google.genai` SDK (v7 style).
+    * Keep the `InspectPort` and `KillProcess` logic—they are excellent for server maintenance.
+    * Ensure stdout from tools is printed to the console in real-time (so the user sees `[S] ⚡ Bash: ls -la` happening).
+
+Generate the complete, runnable Python code.

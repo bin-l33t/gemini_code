@@ -1,0 +1,41 @@
+You are an expert Python Systems Engineer. Your task is to upgrade the existing `auto_test_agent_v7.py` into `auto_test_agent_v8.py`.
+
+### **Mission: Create the "Break-Glass" CLI Utility**
+We need a standalone, high-resilience command-line agent that can operate when the main system (`gemini_server_v8` or `gemini_code`) is broken.
+
+### **Functional Requirements for v8:**
+
+1.  **Hardened Independence (The "Embedded" Rule):**
+    * In v7, `DEFAULT_PERSONA` pointed to a file. In v8, if that file is missing, it **MUST** fall back to a hardcoded, high-quality "Systems Engineer" system prompt embedded directly in the Python script. The agent must never fail to start just because a markdown file is missing.
+
+2.  **Sub-Agent Spawning (New Capability):**
+    * Add a tool called `SpawnSubAgent(mission: str, blocking: bool)`.
+    * **Logic:** This tool should allow the main agent to spin up a *new*, separate process of `auto_test_agent_v8.py` to handle a specific sub-task (e.g., "Tail the logs while I restart the server").
+    * If `blocking=True`, use `subprocess.run` and return the result.
+    * If `blocking=False`, use `subprocess.Popen` (detached) and return the PID, allowing the main agent to continue working while the sub-agent runs in the background.
+
+3.  **Improved Tooling:**
+    * **`SmartRead(path, line_limit=500)`**: Upgrade the `View` tool. If a file is massive (like a log file), reading the whole thing crashes the context window. Add logic to read the *last* N lines by default for logs, or the first N for code.
+    * **`Wait(seconds)`**: Explicit tool to pause execution (useful when waiting for a server restart).
+
+4.  **Self-Perpetuation:**
+    * The script must include a standard `if __name__ == "__main__":` block that handles arguments robustly.
+
+### **Output Instruction:**
+Write the **complete, executable Python code** for `auto_test_agent_v8.py`.
+**IMPORTANT:** Wrap the code in a Python script that **writes the file to disk** immediately upon execution. Do not just output the code block; output a script that *creates* the file.
+
+Example of the wrapper structure you must use:
+```python
+import os
+
+code_content = """
+import os
+import sys
+# ... [THE FULL V8 AGENT CODE GOES HERE] ...
+"""
+
+filename = "auto_test_agent_v8.py"
+with open(filename, "w") as f:
+    f.write(code_content)
+print(f"✅ Successfully created {filename}")
