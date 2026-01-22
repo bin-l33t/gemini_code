@@ -1,0 +1,17 @@
+"Complete the implementation of auto_test_agent_v9.py.
+
+Implement the discovery_mode(self, command) method: it should parse the command for potential filenames, run a bash find . -name <filename> to locate them, and update the StateManifest with the corrected path.
+
+Add a run(self, mission) method. This method must include a loop that:
+
+Calls the Gemini model (gemini-3-pro).
+
+Enforces the 'Thought Protocol' by ensuring a Thought object is parsed and recorded.
+
+Executes tools and feeds the observation back to the model.
+
+Implements a 'max_iterations' safety break and an 'early stopping' check if the Verification Gate passes.
+
+Integrate the toolset from gemini_swarm.tools into the class for easy invocation.
+
+Update the if __name__ == "__main__": block to handle command-line mission input."
