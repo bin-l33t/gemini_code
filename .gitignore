@@ -14,3 +14,7 @@ venv/
 # gemini_audit_report.json
 # final_audit_report.json
 # gemini_audit_final_report.json
+#
+
+# --- Data ---
+gemini_api_rate_limit_*

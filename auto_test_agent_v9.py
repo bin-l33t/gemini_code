@@ -60,6 +60,8 @@ class AutoTestAgentV9:
             "SmartRead": tools.SmartRead,
             "SpawnSubAgent": tools.SpawnSubAgent
         }
+        self.model_id = 'gemini-2.0-flash'
+        os.environ.get('GEMINI_API_KEY')
 
     def discovery_mode(self, command):
         """Parses command for filenames and updates manifest with found paths."""
@@ -118,20 +120,35 @@ class AutoTestAgentV9:
             
             # 2. Parse Thought and Tool (Thought Protocol)
             # Example response structure expected from gemini-3-pro:
-            # { "thought": "...", "expectation": "...", "tool": "Bash", "input": "...", "verification": "..." }
+            # { \"thought\": \"...\", \"expectation\": \"...\", \"tool\": \"Bash\", \"input\": \"...\", \"verification\": \"...\" }
             
             # Placeholder for actual model response parsing:
-            response_data = {"thought": "Inspect directory", "expectation": "Find files", "tool": "Bash", "input": "ls"} 
+            # response_data = {\"thought\": \"Inspect directory\", \"expectation\": \"Find files\", \"tool\": \"Bash\", \"input\": \"ls\"} 
+            
+            # TODO: Replace with actual call to Gemini and JSON parsing
+            try:
+                # Simulate Gemini response (replace with actual API call)
+                # response_json = \'{\"thought\": \"Inspect directory\", \"expectation\": \"Find files\", \"tool\": \"Bash\", \"input\": \"ls\"}\'
+                
+                # For testing, let's assume the response is just the tool and input
+                response_json = '{"thought": "List files", "expectation": "See file names", "tool": "Bash", "input": "ls"}'
+                response_data = json.loads(response_json)
+            except json.JSONDecodeError as e:
+                current_observation = f"Error decoding JSON response: {e}"
+                continue
             
             self.thoughts.record(response_data['thought'], response_data['expectation'])
 
             # 3. Execute Tools
             tool_name = response_data.get("tool")
+            tool_input = response_data.get("input")
             if tool_name == "Bash":
-                res = self.execute_bash(response_data["input"])
+                res = self.execute_bash(tool_input)
                 current_observation = f"STDOUT: {res.stdout}\nSTDERR: {res.stderr}"
             elif tool_name in self.available_tools:
-                current_observation = self.available_tools[tool_name](response_data["input"])
+                current_observation = self.available_tools[tool_name](tool_input)
+            else:
+                current_observation = f"Error: Tool '{tool_name}' not found."
             
             # 4. Early Stopping Check
             if self.verification_gate(response_data.get("verification")):
