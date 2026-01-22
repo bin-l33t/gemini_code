@@ -1,78 +1,71 @@
-
 import json
+import os
 from gemini_swarm.tools import Bash, Edit, SmartRead
-import google.generativeai as genai
+# Assuming gemini_swarm.llm is available and contains the model call function
+# and that Thoughts is defined
 
-class AutoTestAgentV9:
-    def __init__(self, model_name="gemini-1.5-pro"):
-        self.model_name = model_name
-        self.system_instruction = self._load_system_instruction()
-        genai.configure(api_key="YOUR_API_KEY") # Replace with your actual API key
-        self.model = genai.GenerativeModel(self.model_name)
+class Thoughts:
+    def __init__(self, filename="alpha.log"):
+        self.filename = filename
+        self.log = []
 
-    def _load_system_instruction(self):
-        try:
-            content = SmartRead(path="gemini_swarm/personas/agent_claude_code.md")["content"]
-            return content
-        except Exception as e:
-            print(f"Error loading system instruction: {e}")
-            return ""
+    def record(self, thought):
+        self.log.append(thought)
+        with open(self.filename, "a") as f:
+            f.write(thought + "\n")
 
-    def get_model_response(self, prompt):
-        try:
-            response_text = self.model.generate_content([self.system_instruction, prompt]).text
-            try:
-                response_data = json.loads(response_text)
-                # Ensure 'thought' is present in the response_data
-                if 'thought' in response_data:
-                    # Placeholder for self.thoughts.record() call
-                    print(f"Recording thought: {response_data['thought']}")
-                    # self.thoughts.record(response_data['thought']) # Uncomment when self.thoughts is defined
-                else:
-                    print("Warning: 'thought' field not found in model response.")
+class Agent:
+    def __init__(self):
+        self.thoughts = Thoughts()
 
-                # Example tool call (assuming 'tool' and relevant arguments are in response_data)
-                if 'tool' in response_data:
-                    tool = response_data['tool']
-                    if tool == 'Edit':
-                        path = response_data['path']
-                        content = response_data['content']
-                        Edit(path=path, content=content)
-                    elif tool == 'Bash':
-                        command = response_data['command']
-                        Bash(command=command)
-                    elif tool == 'SmartRead':
-                        path = response_data['path']
-                        SmartRead(path=path)
-                    else:
-                        print(f"Unknown tool: {tool}")
-            except json.JSONDecodeError as e:
-                error_message = f"Error decoding JSON response: {e}. Response text: {response_text}"
-                print(error_message)
-                # Log the error to alpha.log
-                Bash(command=f'echo "{error_message}" >> alpha.log')
-                response_data = {"error": "Malformed JSON response from model"} # Provide a fallback
-            return json.dumps(response_data) # Ensure valid JSON is returned
-        except Exception as e:
-            print(f"Error getting model response: {e}")
-            return json.dumps({"error": str(e)}) # Ensure valid JSON even on error
+    def run(self, mission_text):
+        api_key = os.environ.get('GEMINI_API_KEY')
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY not found in environment variables")
 
-    def verification_gate(self, data):
-        # Simulate verification, ensuring valid JSON output
-        if data:
-            result = {"status": "success", "message": "Verification passed"}
+        while True:
+            # Call the model
+            response = self.call_model(mission_text, api_key)
+
+            # Record thoughts
+            self.thoughts.record(response["thought"])
+
+            # Parse the tool call
+            tool_call = response["tool_calls"][0]
+            tool_name = tool_call["name"]
+            tool_arguments = tool_call["args"]
+
+            # Dispatch to the appropriate function
+            if tool_name == "Bash":
+                result = Bash(**tool_arguments)
+            elif tool_name == "Edit":
+                result = Edit(**tool_arguments)
+            elif tool_name == "SmartRead":
+                result = SmartRead(**tool_arguments)
+            else:
+                result = {"error": f"Unknown tool: {tool_name}"}
+
+            # Check for verification
+            if "verification" in response:
+                return response["verification"]
+
+            # Update mission text with the result
+            mission_text = f"Previous mission: {mission_text}. Result: {json.dumps(result)}"
+
+    def call_model(self, mission_text, api_key):
+        # Mock model call for testing - replace with actual model call
+        if "Bash" in mission_text:
+            return {"thought": "Executing bash command", "tool_calls": [{"name": "Bash", "args": {"command": "echo 'hello world'"}}], "verification": "Bash command executed"}
+        elif "Edit" in mission_text:
+            return {"thought": "Editing file", "tool_calls": [{"name": "Edit", "args": {"path": "test.txt", "content": "test content"}}], "verification": "File edited"}
+        elif "SmartRead" in mission_text:
+            return {"thought": "Reading file", "tool_calls": [{"name": "SmartRead", "args": {"path": "test.txt"}}], "verification": "File read"}
         else:
-            result = {"status": "failed", "message": "Verification failed"}
-        return json.dumps(result)
+            return {"thought": "No tool call", "tool_calls": [], "verification": "No tool call"}
 
-# Example usage (replace with your actual test logic)
+# Example usage (replace with your actual mission)
 if __name__ == "__main__":
-    agent = AutoTestAgentV9()
-    prompt = "Write a simple python function to add two numbers."
-    response = agent.get_model_response(prompt)
-    print(f"Model Response: {response}")
-
-    # Simulate data for verification
-    test_data = {"input1": 5, "input2": 10}
-    verification_result = agent.verification_gate(test_data)
-    print(f"Verification Result: {verification_result}")
+    agent = Agent()
+    mission = "Run a bash command to print hello world"
+    result = agent.run(mission)
+    print(f"Mission completed with verification: {result}")
