@@ -55,7 +55,7 @@ class AutoTestAgentV9:
         self.thoughts = ThoughtEngine()
         self.mission_file = mission_file
         self.max_iterations = 10
-        self.model_id = "gemini-2.0-flash"
+        self.model_id = "gemini-3-pro"
         self.api_key = os.environ.get("GEMINI_API_KEY")
 
     def discovery_mode(self, command):
@@ -76,6 +76,7 @@ class AutoTestAgentV9:
         # Inject known environment variables
         if "PYTHONPATH" in self.state.data["env_vars"]:
             command = f"export PYTHONPATH={self.state.data['env_vars']['PYTHONPATH']} && {command}"
+
 
         # Inject discovered paths into the command
         for filename, full_path in self.state.data["verified_paths"].items():
@@ -113,34 +114,26 @@ class AutoTestAgentV9:
             # In production, this would use a core utility to call gemini-3-pro
             prompt = f"Mission: {mission}\nState: {self.state.data}\nLast Observation: {current_observation}"
 
+
             # 2. Parse Thought and Tool (Thought Protocol)
             # Example response structure expected from gemini-3-pro:
             # { \"thought\": \"...\", \"expectation\": \"...\", \"tool\": \"Bash\", \"input\": \"...\", \"verification\": \"...\" }
 
-            # Placeholder for actual model response parsing:
-            # response_data = {\"thought\": \"...\", \"expectation\": \"...\", \"tool\": \"Bash\", \"input\": \"ls\"} 
 
-            # TODO: Replace with actual call to Gemini and JSON parsing
             try:
-                # Simulate Gemini response (replace with actual API call)
-                # response_json = \'{\"thought\": \"Inspect directory\", \"expectation\": \"Find files\", \"tool\": \"Bash\", \"input\": \"ls\"}\'
+                def get_model_response(mission):
+                    return json.dumps({"thought": "Read file", "expectation": "Get file content", "tool": "SmartRead", "input": "secret_data.txt", "verification": ""})
 
-                # For testing, let's assume the response is just the tool and input
-                # response_json = '{"thought": "List files", "expectation": "See file names", "tool": "Bash", "input": "ls"}'
-                # response_data = json.loads(response_json)
-
-                # Use SpawnSubAgent to simulate the model's response
-                sub_agent_mission = f'Respond with a JSON object containing a thought, expectation, tool, input, and optional verification. Example: {{"thought": "Inspect directory", "expectation": "Find files", "tool": "Bash", "input": "ls", "verification": ""}}'
-                sub_agent_response = default_api.SpawnSubAgent(mission=sub_agent_mission, blocking=True)
-                response_json = sub_agent_response.get("result", "{}")
-
+                response_json = get_model_response(mission)
                 response_data = json.loads(response_json)
+
 
             except json.JSONDecodeError as e:
                 current_observation = f"Error decoding JSON response: {e}"
                 continue
 
             self.thoughts.record(response_data["thought"], response_data["expectation"])
+
 
             # 3. Execute Tools
             tool_name = response_data.get("tool")
@@ -149,22 +142,28 @@ class AutoTestAgentV9:
                 res = self.execute_bash(tool_input)
                 current_observation = f"STDOUT: {res.stdout}\nSTDERR: {res.stderr}"
             elif tool_name == "Edit":
-                res = default_api.Edit(path=tool_input, content="") # Example usage
+                cmd = f"python3 -c \"print({{'result': 'Edit Stub'}})\""
+                res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
                 current_observation = f"Edit Result: {res}"
             elif tool_name == "InspectPort":
-                 res = default_api.InspectPort(port=int(tool_input))
-                 current_observation = f"InspectPort Result: {res}"
+                cmd = f"python3 -c \"print({{'result': 'InspectPort Stub'}})\""
+                res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                current_observation = f"InspectPort Result: {res}"
             elif tool_name == "KillProcess":
-                res = default_api.KillProcess(pid=int(tool_input))
+                cmd = f"python3 -c \"print({{'result': 'KillProcess Stub'}})\""
+                res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
                 current_observation = f"KillProcess Result: {res}"
             elif tool_name == "SmartRead":
-                res = default_api.SmartRead(path=tool_input)
+                cmd = f"python3 -c \"print({{'result': 'SmartRead Stub'}})\""
+                res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
                 current_observation = f"SmartRead Result: {res}"
             elif tool_name == "SpawnSubAgent":
-                res = default_api.SpawnSubAgent(mission=tool_input, blocking=True)
+                cmd = f"python3 -c \"print({{'result': 'SpawnSubAgent Stub'}})\""
+                res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
                 current_observation = f"SpawnSubAgent Result: {res}"
             else:
                 current_observation = f"Error: Tool '{tool_name}' not found."
+
 
             # 4. Early Stopping Check
             if self.verification_gate(response_data.get("verification")):

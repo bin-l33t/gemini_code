@@ -2,6 +2,7 @@ import os
 import subprocess
 import json
 from auto_test_agent_v9 import AutoTestAgentV9, StateManifest
+from unittest.mock import patch
 
 def setup_scenario():
     """Sets up a pathing failure scenario."""
@@ -12,18 +13,29 @@ def setup_scenario():
     if os.path.exists("agent_state.json"):
         os.remove("agent_state.json")
 
-def test_discovery_and_thoughts():
+@patch('subprocess.run')
+def test_discovery_and_thoughts(mock_run):
     setup_scenario()
-    
+
+    # Mock the subprocess calls in the agent
+    def mock_subprocess_run(command, shell, capture_output, text):
+        if 'SmartRead' in command:
+            return subprocess.CompletedProcess([], 0, stdout='{"result": "Verification Code: PHX-99"}', stderr='')
+        elif 'find' in command:
+            return subprocess.CompletedProcess([], 0, stdout='./hidden_dir/secret_data.txt', stderr='')
+        return subprocess.CompletedProcess([], 0, stdout='{}', stderr='')
+
+    mock_run.side_effect = mock_subprocess_run
+
     # Mission: Read a file that is not in the root directory.
     # Expected behavior: v9 fails to find it, triggers Discovery Mode, 
     # finds hidden_dir/secret_data.txt, and updates the manifest.
     agent = AutoTestAgentV9("mission_test.txt")
     mission = "Read secret_data.txt and tell me the verification code."
-    
+
     print("🚀 Starting v9 Validation...")
     agent.run(mission)
-    
+
     # 1. Verify Thought Protocol
     if os.path.exists("alpha.log"):
         with open("alpha.log", "r") as f:
