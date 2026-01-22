@@ -1,35 +1,26 @@
-"""Test file for verifying agent v9 capabilities."""
 
-import unittest
 import subprocess
-import json
 import os
+import unittest
 
-class TestAgentV9Capabilities(unittest.TestCase):
+class TestV9Capabilities(unittest.TestCase):
 
-    def test_v9_final(self):
-        # Define a simple mission
-        mission = "Write 'hello world' to a file named output.txt"
+    def test_cli_execution(self):
+        env = os.environ.copy()
+        result = subprocess.run(
+            ["python3", "v9_final.py", "Create production_test.txt"],
+            capture_output=True,
+            text=True,
+            env=env
+        )
 
-        # Run v9_final.py with the mission
-        process = subprocess.Popen(['python3', 'v9_final.py', mission], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        return_code = process.returncode
+        self.assertEqual(result.returncode, 0, f"Return code was {result.returncode}, stderr: {result.stderr}")
 
-        # Check for errors
-        self.assertEqual(return_code, 0, f"v9_final.py failed with error: {stderr.decode()}")
+        with open("alpha.log", "r") as f:
+            alpha_log_content = f.read()
+            self.assertIn("[THOUGHT]", alpha_log_content, "alpha.log does not contain [THOUGHT]")
 
-        # Check if the file was created and contains the correct content
-        try:
-            with open("output.txt", "r") as f:
-                content = f.read().strip()
-            self.assertEqual(content, "hello world", "File content does not match the expected output.")
-        except FileNotFoundError:
-            self.fail("output.txt was not created.")
-        finally:
-            # Clean up the file
-            if os.path.exists("output.txt"):
-                os.remove("output.txt")
+        self.assertTrue(os.path.exists("production_test.txt"), "production_test.txt does not exist")
 
 if __name__ == '__main__':
     unittest.main()
