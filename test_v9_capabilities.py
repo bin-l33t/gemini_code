@@ -1,23 +1,25 @@
-import subprocess
+
 import unittest
+import subprocess
 import os
+import json
 
-class TestV9Capabilities(unittest.TestCase):
+class TestAgentV9(unittest.TestCase):
 
-    def test_v9_subprocess_call(self):
-        # Hardcode the target file
-        target_file = 'v9_final.py'
-        
-        # Construct the full path to the target file
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        target_path = os.path.join(script_dir, target_file)
-
-        # Call the subprocess with the hardcoded target file
-        process = subprocess.Popen(['python', target_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def test_production_file_creation(self):
+        mission = "Create a file named production_test.txt with the content AGENT_V9_VERIFIED. Use the Edit tool to create the file."
+        process = subprocess.Popen(["python", "v9_final.py", mission], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
+        return_code = process.returncode
 
-        # Assert that the subprocess executed successfully (you might need to adjust the assertion based on the expected behavior of v9_final.py)
-        self.assertEqual(process.returncode, 0, f'Subprocess failed with error: {stderr.decode()}')
+        self.assertTrue(os.path.exists("production_test.txt"))
+        self.assertIn("✅ Test Sequence Complete.".encode('utf-8'), stdout)
+
+        try:
+            result = json.loads(stdout.decode('utf-8'))
+            self.assertEqual(result['verification'], 'File created and content verified.')
+        except (json.JSONDecodeError, KeyError) as e:
+            self.fail(f"Failed to parse JSON or find verification key: {e}")
 
 if __name__ == '__main__':
-    unittest.main(argv=['first-arg-is-ignored'], exit=False)
+    unittest.main()
